@@ -4,11 +4,13 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public InputAction moveAction;
+    public Transform orientation;
     public float moveSpeed = 1f;
 
     Rigidbody rb;
-    Vector2 moveDirection;
-    public InputActionReference moveAction;
+    Vector3 moveDirection;
+    Vector2 inputs;
 
     void Start()
     {
@@ -17,13 +19,28 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        moveDirection = moveAction.action.ReadValue<Vector2>();
+        inputs = moveAction.ReadValue<Vector2>();
     }
 
     void FixedUpdate() 
     {
-        float xMove = moveDirection.x * moveSpeed * Time.deltaTime * 100f;
-        float zMove = moveDirection.y * moveSpeed * Time.deltaTime * 100f;
-        rb.AddRelativeForce(xMove, 0, zMove);
+        MovePlayer();
+    }
+
+    void MovePlayer()
+    {
+        moveDirection = orientation.forward * inputs.y + orientation.right * inputs.x;
+
+        rb.AddForce(moveDirection.normalized * moveSpeed * 100f * Time.deltaTime, ForceMode.Force);
+    }
+
+    private void OnEnable()
+    {
+        moveAction.Enable();
+    }
+
+    private void OnDisable()
+    {
+        moveAction.Disable();
     }
 }

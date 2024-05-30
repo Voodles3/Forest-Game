@@ -3,53 +3,53 @@ using UnityEngine.InputSystem;
 
 public class MouseLook : MonoBehaviour
 {
+    public Transform orientation;
+    public InputAction lookAction;
+
     public float sensitivity = 100f;
-    public float smoothing = 0.1f;
-    public Transform playerBody;
+    public float smoothTime = 0.1f;
 
-    private PlayerControls playerControls;
-    private InputAction lookAction;
+    Vector2 currentMouseDelta;
+    Vector2 currentMouseDeltaVelocity;
 
-    private Vector2 currentMouseDelta;
-    private Vector2 currentMouseDeltaVelocity;
-
-    private float xRotation = 0f;
-
-    private void Awake()
-    {
-        playerControls = new PlayerControls();
-    }
-
-    private void OnEnable()
-    {
-        lookAction = playerControls.Camera.Look;
-        lookAction.Enable();
-    }
-
-    private void OnDisable()
-    {
-        lookAction.Disable();
-    }
+    float pitch = 0f;
+    float yaw = 0f;
 
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    void LateUpdate()
+    void Update()
     {
-        Vector2 targetMouseDelta = lookAction.ReadValue<Vector2>() * sensitivity * Time.smoothDeltaTime;
+        //Vector2 targetMouseDelta = lookAction.ReadValue<Vector2>() * sensitivity * Time.fixedDeltaTime;
 
-        // Smooth the mouse delta using Lerp for simplicity
-        currentMouseDelta = Vector2.Lerp(currentMouseDelta, targetMouseDelta, smoothing);
+        // Smooth the mouse delta
+        //currentMouseDelta = Vector2.SmoothDamp(currentMouseDelta, targetMouseDelta, ref currentMouseDeltaVelocity, smoothTime);
 
-        float mouseX = currentMouseDelta.x;
-        float mouseY = currentMouseDelta.y;
 
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        //float mouseX = currentMouseDelta.x;
+        //float mouseY = currentMouseDelta.y;
 
-        transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        playerBody.Rotate(Vector3.up * mouseX);
+        float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * sensitivity;
+        float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sensitivity;
+
+        yaw += mouseX;
+
+        pitch -= mouseY;
+        pitch = Mathf.Clamp(pitch, -90f, 90f);
+
+        transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+        orientation.rotation = Quaternion.Euler(0f, yaw, 0f);
+    }
+
+    private void OnEnable()
+    {
+        lookAction.Enable();
+    }
+
+    private void OnDisable()
+    {
+        lookAction.Disable();
     }
 }

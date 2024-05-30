@@ -356,6 +356,7 @@
 -analyzer:"D:/Unity/Editors/2022.3.29f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll"
 -analyzer:"D:/Unity/Editors/2022.3.29f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 "Assets/Input/PlayerControls.cs"
+"Assets/Scripts/MoveCamera.cs"
 "Assets/Scripts/PlayerLook.cs"
 "Assets/Scripts/PlayerMovement.cs"
 -langversion:9.0
