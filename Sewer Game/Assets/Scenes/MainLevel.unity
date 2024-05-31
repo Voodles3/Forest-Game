@@ -398,26 +398,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f729a0b9fad52f44b8e541e2446a889, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  orientation: {fileID: 438279283}
-  lookAction:
-    m_Name: Look
-    m_Type: 0
-    m_ExpectedControlType: Vector2
-    m_Id: ed33a8f5-8ed5-4c39-aa6a-09117f9d9441
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings:
-    - m_Name: 
-      m_Id: 9bc459eb-cf1d-4d1a-9b1c-84fe394f761e
-      m_Path: <Mouse>/delta
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Look
-      m_Flags: 0
-    m_Flags: 0
   sensitivity: 2
   smoothTime: 0.01
+  orientation: {fileID: 438279283}
 --- !u!1 &1084183395
 GameObject:
   m_ObjectHideFlags: 0
@@ -532,7 +515,7 @@ GameObject:
   - component: {fileID: 1213021276}
   - component: {fileID: 1213021275}
   - component: {fileID: 1213021274}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -619,8 +602,8 @@ Transform:
   m_GameObject: {fileID: 1213021273}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.5, z: 0}
-  m_LocalScale: {x: 50, y: 1, z: 50}
+  m_LocalPosition: {x: 0, y: -2.5, z: 0}
+  m_LocalScale: {x: 100, y: 5, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -782,58 +765,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d7c1891d4f2efe46bb4e2afbb7f3426, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 15
+  moveSpeed: 10
+  groundDrag: 5
+  airDrag: 2
+  dragTransitionTime: 1
+  jumpForce: 15
+  jumpCooldown: 0.25
+  airSpeedMultiplier: 0.4
+  jumpGravityMultiplier: 3
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 64
+  groundDistance: 1.6
+  grounded: 0
   orientation: {fileID: 438279283}
+  playerBody: {fileID: 1607079523}
   velocityText: {fileID: 1690841195}
-  moveAction:
-    m_Name: Move
-    m_Type: 2
-    m_ExpectedControlType: Vector2
-    m_Id: 2022b603-2697-4d83-9202-1ab95ef8bd38
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings:
-    - m_Name: WASD
-      m_Id: 4a06baaa-da5e-43c9-b100-59e5abf9e086
-      m_Path: 2DVector
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Move
-      m_Flags: 4
-    - m_Name: up
-      m_Id: 1511bb5c-6f1a-4bfa-af43-5e5cdc52c0f9
-      m_Path: <Keyboard>/w
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Move
-      m_Flags: 8
-    - m_Name: down
-      m_Id: 254b7e89-d3cf-43e3-aa17-e36fdc1e0bd3
-      m_Path: <Keyboard>/s
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Move
-      m_Flags: 8
-    - m_Name: left
-      m_Id: 9435cf86-b5de-4a92-be4d-51d288098d85
-      m_Path: <Keyboard>/a
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Move
-      m_Flags: 8
-    - m_Name: right
-      m_Id: f706292c-cfcc-4a68-9adf-c8fb6cd673de
-      m_Path: <Keyboard>/d
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Move
-      m_Flags: 8
-    m_Flags: 0
 --- !u!54 &1561144720
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -843,7 +790,7 @@ Rigidbody:
   m_GameObject: {fileID: 1561144716}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 7
+  m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -860,7 +807,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 3
 --- !u!1 &1607079522
 GameObject:
   m_ObjectHideFlags: 0
