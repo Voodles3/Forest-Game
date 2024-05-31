@@ -1,3 +1,4 @@
+using UnityEditor.Callbacks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -22,17 +23,21 @@ public class MouseLook : MonoBehaviour
 
     void Update()
     {
-        //Vector2 targetMouseDelta = lookAction.ReadValue<Vector2>() * sensitivity * Time.fixedDeltaTime;
+        Vector2 targetMouseDelta = lookAction.ReadValue<Vector2>() * sensitivity * Time.fixedUnscaledDeltaTime;
 
         // Smooth the mouse delta
-        //currentMouseDelta = Vector2.SmoothDamp(currentMouseDelta, targetMouseDelta, ref currentMouseDeltaVelocity, smoothTime);
+        currentMouseDelta = Vector2.SmoothDamp(currentMouseDelta, targetMouseDelta, ref currentMouseDeltaVelocity, smoothTime);
 
+        //Debug.Log($"Current mouse delta: {currentMouseDelta}");
 
         //float mouseX = currentMouseDelta.x;
         //float mouseY = currentMouseDelta.y;
 
-        float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * sensitivity;
-        float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sensitivity;
+        float mouseX = targetMouseDelta.x;
+        float mouseY = targetMouseDelta.y;
+
+        //float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * sensitivity;
+        //float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sensitivity;
 
         yaw += mouseX;
 

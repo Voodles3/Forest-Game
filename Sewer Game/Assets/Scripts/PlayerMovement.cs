@@ -1,12 +1,16 @@
 using System.Linq.Expressions;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public InputAction moveAction;
-    public Transform orientation;
+    [Header("Movement")]
     public float moveSpeed = 1f;
+
+    public Transform orientation;
+    public TMP_Text velocityText;
+    public InputAction moveAction;
 
     Rigidbody rb;
     Vector3 moveDirection;
@@ -15,16 +19,23 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
     }
 
     void Update()
     {
-        inputs = moveAction.ReadValue<Vector2>();
+        velocityText.text = $"Velocity: {rb.velocity.magnitude:F2}";
+        ReceiveInput();
     }
 
     void FixedUpdate() 
     {
         MovePlayer();
+    }
+
+    void ReceiveInput()
+    {
+        inputs = moveAction.ReadValue<Vector2>();
     }
 
     void MovePlayer()
@@ -34,12 +45,12 @@ public class PlayerMovement : MonoBehaviour
         rb.AddForce(moveDirection.normalized * moveSpeed * 100f * Time.deltaTime, ForceMode.Force);
     }
 
-    private void OnEnable()
+    void OnEnable()
     {
         moveAction.Enable();
     }
 
-    private void OnDisable()
+    void OnDisable()
     {
         moveAction.Disable();
     }
