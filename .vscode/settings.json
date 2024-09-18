@@ -51,6 +51,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Sewer Game.sln",
+    "dotnet.defaultSolution": "Forest-Game.sln",
     "git.ignoreLimitWarning": true
 }
