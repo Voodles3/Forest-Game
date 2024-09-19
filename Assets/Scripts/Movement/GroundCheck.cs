@@ -6,26 +6,26 @@ namespace Forest.Movement
 {
     public class GroundCheck : MonoBehaviour
     {
-        PlayerMovement movementScript;
+        PlayerMovement playerMovement;
 
         void Start()
         {
-            movementScript = GetComponentInParent<PlayerMovement>();
+            playerMovement = GetComponentInParent<PlayerMovement>();
         }
 
         void OnTriggerEnter(Collider other) 
         {
-            movementScript.GroundCheck(true);
+            playerMovement.GroundCheck(true);
         }
 
         void OnTriggerStay(Collider other) 
         {
-            movementScript.GroundCheck(true);
+            playerMovement.GroundCheck(true);
         }
 
         void OnTriggerExit(Collider other) 
         {
-            movementScript.GroundCheck(false);
+            playerMovement.GroundCheck(false);
         }
     }
 }

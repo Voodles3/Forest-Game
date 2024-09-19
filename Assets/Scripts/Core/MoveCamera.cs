@@ -6,12 +6,14 @@ namespace Forest.Core
 {
     public class CameraHolder : MonoBehaviour
     {
-        public Transform cameraPosition;
+        [SerializeField] Transform cameraPosOnPlayer;
+        Vector3 currentVel;
 
         // LateUpdate so that physics calculations and other movements are done first, then camera follows
         void LateUpdate()
         {
-            transform.position = cameraPosition.position;    
+            //transform.position = cameraTransform.position;
+            transform.position = Vector3.SmoothDamp(transform.position, cameraPosOnPlayer.position, ref currentVel, 0.02f);
         }
     }
 }

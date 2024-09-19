@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.ComponentModel;
 using System.Data;
@@ -13,10 +14,12 @@ namespace Forest.Movement
         [Header("Movement")]
         float moveSpeed;
         [SerializeField] float walkSpeed;
+        [SerializeField] float crouchSpeed;
         [SerializeField] float sprintSpeed;
         [SerializeField] float stopForce;
         [SerializeField] float groundDrag;
         [SerializeField] float airDrag;
+        [SerializeField] float staticDrag;
         [SerializeField] float dragTransitionTime;
         [SerializeField] float dynamicFriction;
         [SerializeField] float staticFriction;
@@ -41,11 +44,13 @@ namespace Forest.Movement
         [SerializeField] LayerMask groundMask;
         [SerializeField] TMP_Text velocityText;
         [SerializeField] TMP_Text maxVelocityText;
+        [SerializeField] Animator animator;
         float maxVel;
 
         PlayerActions inputActions;
         InputAction jumpAction;
         InputAction sprintAction;
+        InputAction crouchAction;
 
         Rigidbody rb;
         Vector3 moveDirection;
@@ -64,6 +69,8 @@ namespace Forest.Movement
             inputActions = new PlayerActions();
             jumpAction = inputActions.Gameplay.Jump;
             sprintAction = inputActions.Gameplay.Sprint;
+            crouchAction = inputActions.Gameplay.Crouch;
+            animator = GetComponent<Animator>();
         }
 
         void Start()
@@ -76,9 +83,9 @@ namespace Forest.Movement
         void Update()
         {
             ReceiveInput();
+            StateHandler();
             LimitSpeed();
             ApplyDrag();
-            StateHandler();
             ApplyStopForce();
             UpdateHUDText();
         }
@@ -102,7 +109,12 @@ namespace Forest.Movement
 
         void StateHandler()
         {
-            if (grounded && sprintAction.ReadValue<float>() > 0f)
+            if (crouchAction.ReadValue<float>() > 0f)
+            {
+                currentMovementState = MovementState.crouching;
+                moveSpeed = crouchSpeed;
+            }
+            else if (grounded && sprintAction.ReadValue<float>() > 0f)
             {
                 currentMovementState = MovementState.sprinting;
                 moveSpeed = sprintSpeed;
@@ -120,12 +132,9 @@ namespace Forest.Movement
 
         void ReceiveInput()
         {
-            inputs = inputActions.Gameplay.Movement.ReadValue<Vector2>();
-            
-            if (jumpAction.ReadValue<float>() > 0)
-            {
-                OnJump();
-            }
+            inputs = inputActions.Gameplay.Movement.ReadValue<Vector2>(); // Move
+            if (jumpAction.ReadValue<float>() > 0f) { OnJump(); } // Jump
+            Crouch(crouchAction.ReadValue<float>() > 0f); // Crouch
         }
 
         void MovePlayer()
@@ -136,14 +145,19 @@ namespace Forest.Movement
             if (grounded)
             {
                 moveForce = 450f * moveSpeed * Time.deltaTime * moveDirection.normalized;
-                rb.useGravity = false;
+                //rb.useGravity = false;
             }
             else
             {
                 moveForce = 450f * airSpeedMultiplier * moveSpeed * Time.deltaTime * moveDirection.normalized;
-                rb.useGravity = true;
+                //rb.useGravity = true;
             }
             if (canAccelerate) { rb.AddForce(moveForce, ForceMode.Force); }
+        }
+
+        void Crouch(bool crouched)
+        {
+            animator.SetBool("crouched", crouched);
         }
 
         void OnJump()
@@ -188,12 +202,13 @@ namespace Forest.Movement
 
         void ApplyDrag()
         {
-            if (grounded && Mathf.Abs(rb.velocity.y) < 0.1f)
+            if (grounded && Mathf.Abs(rb.velocity.magnitude) < 0.2f && inputs.magnitude == 0f)
             {
-                if (rb.drag == airDrag)
-                {
-                    StartCoroutine(SmoothDrag());
-                }
+                rb.drag = staticDrag;
+            }
+            else if (grounded)
+            {
+                StartCoroutine(SmoothDrag());
             }
             else
             {
