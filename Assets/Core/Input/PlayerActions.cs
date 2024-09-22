@@ -71,6 +71,24 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Cycle Inventory"",
+                    ""type"": ""Value"",
+                    ""id"": ""02301c89-9465-4017-a335-2d557ce48de5"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Drop Held Item"",
+                    ""type"": ""Button"",
+                    ""id"": ""5ecff09b-b6c4-4f88-bc3a-c5d54b67bb4d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -172,6 +190,28 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4a87c885-3204-4a51-bc61-8574c8d18a4b"",
+                    ""path"": ""<Mouse>/scroll"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Cycle Inventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""33409c1d-4990-474e-a95a-ff047eb5742c"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Drop Held Item"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -225,6 +265,8 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         m_Gameplay_Sprint = m_Gameplay.FindAction("Sprint", throwIfNotFound: true);
         m_Gameplay_Crouch = m_Gameplay.FindAction("Crouch", throwIfNotFound: true);
         m_Gameplay_Interact = m_Gameplay.FindAction("Interact", throwIfNotFound: true);
+        m_Gameplay_CycleInventory = m_Gameplay.FindAction("Cycle Inventory", throwIfNotFound: true);
+        m_Gameplay_DropHeldItem = m_Gameplay.FindAction("Drop Held Item", throwIfNotFound: true);
         // Camera
         m_Camera = asset.FindActionMap("Camera", throwIfNotFound: true);
         m_Camera_Look = m_Camera.FindAction("Look", throwIfNotFound: true);
@@ -294,6 +336,8 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Sprint;
     private readonly InputAction m_Gameplay_Crouch;
     private readonly InputAction m_Gameplay_Interact;
+    private readonly InputAction m_Gameplay_CycleInventory;
+    private readonly InputAction m_Gameplay_DropHeldItem;
     public struct GameplayActions
     {
         private @PlayerActions m_Wrapper;
@@ -303,6 +347,8 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         public InputAction @Sprint => m_Wrapper.m_Gameplay_Sprint;
         public InputAction @Crouch => m_Wrapper.m_Gameplay_Crouch;
         public InputAction @Interact => m_Wrapper.m_Gameplay_Interact;
+        public InputAction @CycleInventory => m_Wrapper.m_Gameplay_CycleInventory;
+        public InputAction @DropHeldItem => m_Wrapper.m_Gameplay_DropHeldItem;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -327,6 +373,12 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @Interact.started += instance.OnInteract;
             @Interact.performed += instance.OnInteract;
             @Interact.canceled += instance.OnInteract;
+            @CycleInventory.started += instance.OnCycleInventory;
+            @CycleInventory.performed += instance.OnCycleInventory;
+            @CycleInventory.canceled += instance.OnCycleInventory;
+            @DropHeldItem.started += instance.OnDropHeldItem;
+            @DropHeldItem.performed += instance.OnDropHeldItem;
+            @DropHeldItem.canceled += instance.OnDropHeldItem;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -346,6 +398,12 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @Interact.started -= instance.OnInteract;
             @Interact.performed -= instance.OnInteract;
             @Interact.canceled -= instance.OnInteract;
+            @CycleInventory.started -= instance.OnCycleInventory;
+            @CycleInventory.performed -= instance.OnCycleInventory;
+            @CycleInventory.canceled -= instance.OnCycleInventory;
+            @DropHeldItem.started -= instance.OnDropHeldItem;
+            @DropHeldItem.performed -= instance.OnDropHeldItem;
+            @DropHeldItem.canceled -= instance.OnDropHeldItem;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -425,6 +483,8 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         void OnSprint(InputAction.CallbackContext context);
         void OnCrouch(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
+        void OnCycleInventory(InputAction.CallbackContext context);
+        void OnDropHeldItem(InputAction.CallbackContext context);
     }
     public interface ICameraActions
     {

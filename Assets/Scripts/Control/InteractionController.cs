@@ -17,7 +17,6 @@ namespace Forest.Interaction
 
         PlayerActions actions;
         InputAction interactAction;
-        ButtonControl interactButton;
 
         void Awake()
         {
