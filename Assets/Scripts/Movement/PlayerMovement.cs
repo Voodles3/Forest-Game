@@ -87,24 +87,12 @@ namespace Forest.Movement
             LimitSpeed();
             ApplyDrag();
             ApplyStopForce();
-            UpdateHUDText();
         }
 
         void FixedUpdate() 
         {
             MovePlayer();
             ApplyGravity();
-        }
-
-        void UpdateHUDText()
-        {
-            Vector3 horizVel = new(rb.velocity.x, 0, rb.velocity.z);
-            velocityText.text = $"Velocity: {horizVel.magnitude:F2}";
-            if (horizVel.magnitude > maxVel)
-            {
-                maxVel = horizVel.magnitude;
-                maxVelocityText.text = $"Max Velocity: {maxVel:F5}";
-            }
         }
 
         void StateHandler()
