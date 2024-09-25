@@ -1,11 +1,8 @@
-
 using System.Collections;
-using System.ComponentModel;
-using System.Data;
-using System.Linq.Expressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Forest.UI;
 
 namespace Forest.Movement
 {
@@ -37,6 +34,10 @@ namespace Forest.Movement
         [SerializeField] bool grounded;
         bool readyToJump = true;
 
+        [Header("Stamina")]
+        [SerializeField] float sprintCost;
+        [SerializeField] float jumpCost;
+
         [Header("References")]
         [SerializeField] Transform orientation;
         [SerializeField] Transform playerBody;
@@ -45,6 +46,7 @@ namespace Forest.Movement
         [SerializeField] TMP_Text velocityText;
         [SerializeField] TMP_Text maxVelocityText;
         [SerializeField] Animator animator;
+        StaminaBar stamina;
         float maxVel;
 
         PlayerActions inputActions;
@@ -56,12 +58,17 @@ namespace Forest.Movement
         Vector3 moveDirection;
         Vector2 inputs;
 
-        enum MovementState
+        public enum MovementState
         {
             walking,
             sprinting,
             air, 
             crouching
+        }
+
+        public MovementState CurrentMovementState
+        {
+            get { return currentMovementState; }
         }
 
         void Awake()
@@ -71,6 +78,7 @@ namespace Forest.Movement
             sprintAction = inputActions.Gameplay.Sprint;
             crouchAction = inputActions.Gameplay.Crouch;
             animator = GetComponent<Animator>();
+            stamina = FindObjectOfType<StaminaBar>();
         }
 
         void Start()
@@ -87,6 +95,7 @@ namespace Forest.Movement
             LimitSpeed();
             ApplyDrag();
             ApplyStopForce();
+            DrainStamina();
         }
 
         void FixedUpdate() 
@@ -102,7 +111,7 @@ namespace Forest.Movement
                 currentMovementState = MovementState.crouching;
                 moveSpeed = crouchSpeed;
             }
-            else if (grounded && sprintAction.ReadValue<float>() > 0f)
+            else if (stamina.currentStamina > 0f && grounded && sprintAction.ReadValue<float>() > 0f && inputs.magnitude > 0f && rb.velocity.magnitude > 1f)
             {
                 currentMovementState = MovementState.sprinting;
                 moveSpeed = sprintSpeed;
@@ -150,7 +159,7 @@ namespace Forest.Movement
 
         void OnJump()
         {
-            if (readyToJump && grounded)
+            if (readyToJump && grounded && stamina.currentStamina >= jumpCost)
             {
                 readyToJump = false;
                 playerMaterial.dynamicFriction = 0f;
@@ -165,6 +174,7 @@ namespace Forest.Movement
         {
             rb.velocity = new(rb.velocity.x, 0f, rb.velocity.z);
             rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+            stamina.RemoveStamina(jumpCost);
         }
 
         void ApplyGravity()
@@ -190,18 +200,18 @@ namespace Forest.Movement
 
         void ApplyDrag()
         {
-            if (grounded && Mathf.Abs(rb.velocity.magnitude) < 0.2f && inputs.magnitude == 0f)
+            if (readyToJump && grounded && Mathf.Abs(rb.velocity.magnitude) < 0.2f && inputs.magnitude == 0f)
             {
                 rb.drag = staticDrag;
             }
-            else if (grounded)
+            else if (readyToJump && grounded)
             {
                 StartCoroutine(SmoothDrag());
             }
             else
             {
-                rb.drag = airDrag;
                 StopAllCoroutines();
+                rb.drag = airDrag;
             }
         }
 
@@ -255,6 +265,18 @@ namespace Forest.Movement
                 {
                     rb.velocity = new(0f, rb.velocity.y, 0f);
                 }
+            }
+        }
+
+        void DrainStamina()
+        {
+            if (currentMovementState == MovementState.sprinting)
+            {
+                stamina.StartDrainingStamina(sprintCost);
+            }
+            else
+            {
+                stamina.StopDrainingStamina();
             }
         }
 

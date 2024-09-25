@@ -44,15 +44,19 @@ namespace Forest.Inventory
 
         public void Interact()
         {
-            // For now the only interaction functionality for an InventoryItem is to be picked up
+            // For now, the only interaction functionality for an InventoryItem is to be picked up
             if (canBePickedUp) { PickUp(); }
             else { Debug.Log("This item cannot be picked up!"); }
         }
 
         void PickUp()
         {
+            Rigidbody rb = GetComponent<Rigidbody>();
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            InventoryManager.Instance.AddItem(this);
             gameObject.SetActive(false);
-            InventoryManager.Instance.AddItem(this); 
         }
     }
 }

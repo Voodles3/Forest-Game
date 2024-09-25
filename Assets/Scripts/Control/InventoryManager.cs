@@ -1,13 +1,8 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Globalization;
-using System.ComponentModel;
-using System.Diagnostics.Tracing;
-using System;
-using Unity.Mathematics;
 
 namespace Forest.Inventory
 {
@@ -24,20 +19,25 @@ namespace Forest.Inventory
 
         [Header("References")]
         [SerializeField] Transform dropOrigin;
+        [SerializeField] Transform facingDirection;
+        Transform cameraTransform;
 
         int activeIndex;
 
         PlayerActions actions;
         InputAction scrollAction;
         InputAction dropAction;
+        
         float scrollInput;
 
         void Awake()
         {
             Singleton();
             InputSetup();
-            activeItem = null; // TODO: make active item save between play sessions
-            activeIndex = -1; 
+            activeItem = null; // TODO: make active item + inventory save between play sessions
+            activeIndex = -1;
+
+            cameraTransform = Camera.main.transform;
         }
 
         void Singleton()
@@ -73,10 +73,10 @@ namespace Forest.Inventory
 
         void CycleActiveItem(int direction)
         {
-            int candidateIndex = activeIndex + direction;
-            if (!CheckIndexExists(candidateIndex)) return;
+            int newIndex = activeIndex + direction;
+            if (!CheckIndexExists(newIndex)) return;
 
-            SetItemActive(candidateIndex);
+            SetItemActive(newIndex);
         }
 
         public void AddItem(InventoryItem item)
@@ -87,41 +87,65 @@ namespace Forest.Inventory
             if (inventory.Count == 1) { SetItemActive(); }
         }
 
+        #region Drop Item
+
         void DropItem(int index)
         {
-            if (!CheckIndexExists(index)) { Debug.Log("Your inventory is empty!"); return; }
-
-            // Find which item is in this index
-            // Remove it from the inventory
-            // Activate the gameobject attached to it and throw it
-            // Set a new item active
+            if (index == -1f) { Debug.Log("Your inventory is empty!"); return; }
 
             InventoryItem itemToDrop = inventory[index];
             inventory.Remove(itemToDrop);
 
-            itemToDrop.gameObject.SetActive(true); // Activate it first in order to access collider size
+            float offset = GetColliderSize(itemToDrop);
+            
+            Vector3 spawnPosition = SetSpawnPoint(offset);
+
+            itemToDrop.gameObject.transform.position = spawnPosition;
+            itemToDrop.gameObject.SetActive(true);
+            
+            ThrowItem(itemToDrop);
+
+            SetItemActive(CheckIndexExists(index) ? index : index - 1); // Set next item in inventory to active
+        }
+
+        Vector3 SetSpawnPoint(float offset)
+        {
+            Vector3 spawnPosition = dropOrigin.position + (facingDirection.forward * offset);
+
+            Vector3 rayDirection = (spawnPosition - cameraTransform.position).normalized;
+            float rayDistance = Vector3.Distance(cameraTransform.position, spawnPosition);
+
+            if (Physics.Raycast(cameraTransform.position, rayDirection, out RaycastHit hit, rayDistance))
+            {
+                return hit.point - rayDirection * offset;
+            }
+
+            return spawnPosition;
+        }
+
+        float GetColliderSize(InventoryItem itemToDrop)
+        {
+            itemToDrop.gameObject.SetActive(true); // Must be active to access collider size
 
             Collider itemCollider = itemToDrop.gameObject.GetComponent<Collider>();
-            Vector3 itemSize = itemCollider.bounds.size; // Check how large item is to make sure it spawns outside of player
+            Vector3 itemSize = itemCollider.bounds.size;
 
-            Vector3 spawnPosition = dropOrigin.position + (Camera.main.transform.forward * (itemSize.z / 2f + 0.5f));
-            itemToDrop.transform.position = spawnPosition; // Spawn gObject at drop position
-            
+            itemToDrop.gameObject.SetActive(false); // Must be inactive to teleport to spawnPosition
+
+            return itemSize.magnitude / 2;
+        }
+
+        void ThrowItem(InventoryItem itemToDrop)
+        {
             Rigidbody itemRb = itemToDrop.gameObject.GetComponent<Rigidbody>();
+
             itemRb.velocity = GetComponent<Rigidbody>().velocity; // Make gObject inherit the player's current velocity
 
-            Vector3 dropVector = Camera.main.transform.forward * dropForce; 
-            itemRb.AddRelativeForce(dropVector, ForceMode.Impulse); // Throw gObject
-
-            if (CheckIndexExists(index))
-            {
-                SetItemActive(index); // Set next item in inventory to active
-            }
-            else
-            {
-                SetItemActive(index - 1);
-            }
+            Vector3 dropVector = cameraTransform.forward * dropForce; 
+            itemRb.AddForce(dropVector, ForceMode.Impulse); // Throw gObject
         }
+        
+        #endregion
 
         void SetItemActive(int index=0)
         {
