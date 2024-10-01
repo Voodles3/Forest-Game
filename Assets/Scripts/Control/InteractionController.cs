@@ -1,14 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
 
 namespace Forest.Interaction
 {
     interface IInteractable
     {
         public void Interact();
+        //public void OnHover(bool hovering);
     }
 
     public class InteractionController : MonoBehaviour
@@ -17,6 +15,7 @@ namespace Forest.Interaction
 
         PlayerActions actions;
         InputAction interactAction;
+        IInteractable currentInteractable;
 
         void Awake()
         {
@@ -26,22 +25,32 @@ namespace Forest.Interaction
 
         void Update()
         {
+            CastInteractionRay();
             if (interactAction.triggered)
             {
                 Interact();
             }
         }
 
-        void Interact()
+        void CastInteractionRay()
         {
             Ray ray = new(Camera.main.transform.position, Camera.main.transform.forward);
             if (Physics.Raycast(ray, out RaycastHit hit, maxInteractionDistance))
             {
                 if (hit.transform.TryGetComponent(out IInteractable interactable))
                 {
-                    interactable.Interact();
+                    currentInteractable = interactable;
+                    //interactable.OnHover(true);
+                    return;
                 }
             }
+            //currentInteractable?.OnHover(false);
+            currentInteractable = null;
+        }
+
+        void Interact()
+        {
+            currentInteractable?.Interact();
         }
 
         void OnEnable()
