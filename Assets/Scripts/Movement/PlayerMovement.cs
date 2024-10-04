@@ -9,7 +9,6 @@ namespace Forest.Movement
     public class PlayerMovement : MonoBehaviour
     {
         [Header("Movement")]
-        float moveSpeed;
         [SerializeField] float walkSpeed;
         [SerializeField] float crouchSpeed;
         [SerializeField] float sprintSpeed;
@@ -21,6 +20,7 @@ namespace Forest.Movement
         [SerializeField] float dynamicFriction;
         [SerializeField] float staticFriction;
         [SerializeField] MovementState currentMovementState;
+        float moveSpeed;
         bool dragTransitioning;
         bool canAccelerate = true;
 
@@ -43,11 +43,8 @@ namespace Forest.Movement
         [SerializeField] Transform playerBody;
         [SerializeField] PhysicMaterial playerMaterial;
         [SerializeField] LayerMask groundMask;
-        [SerializeField] TMP_Text velocityText;
-        [SerializeField] TMP_Text maxVelocityText;
-        [SerializeField] Animator animator;
-        StaminaBar stamina;
-        float maxVel;
+        Animator animator;
+        StaminaBar staminaBar;
 
         PlayerActions inputActions;
         InputAction jumpAction;
@@ -78,7 +75,7 @@ namespace Forest.Movement
             sprintAction = inputActions.Gameplay.Sprint;
             crouchAction = inputActions.Gameplay.Crouch;
             animator = GetComponent<Animator>();
-            stamina = FindObjectOfType<StaminaBar>();
+            staminaBar = FindObjectOfType<StaminaBar>();
         }
 
         void Start()
@@ -111,7 +108,7 @@ namespace Forest.Movement
                 currentMovementState = MovementState.crouching;
                 moveSpeed = crouchSpeed;
             }
-            else if (stamina.currentStamina > 0f && grounded && sprintAction.ReadValue<float>() > 0f && inputs.magnitude > 0f && rb.velocity.magnitude > 1f)
+            else if (staminaBar.currentStamina > 0f && grounded && sprintAction.ReadValue<float>() > 0f && inputs.magnitude > 0f && rb.velocity.magnitude > 1f)
             {
                 currentMovementState = MovementState.sprinting;
                 moveSpeed = sprintSpeed;
@@ -159,7 +156,7 @@ namespace Forest.Movement
 
         void OnJump()
         {
-            if (readyToJump && grounded && stamina.currentStamina >= jumpCost)
+            if (readyToJump && grounded && staminaBar.currentStamina >= jumpCost)
             {
                 readyToJump = false;
                 playerMaterial.dynamicFriction = 0f;
@@ -174,7 +171,7 @@ namespace Forest.Movement
         {
             rb.velocity = new(rb.velocity.x, 0f, rb.velocity.z);
             rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-            stamina.RemoveStamina(jumpCost);
+            staminaBar.RemoveStamina(jumpCost);
         }
 
         void ApplyGravity()
@@ -272,11 +269,11 @@ namespace Forest.Movement
         {
             if (currentMovementState == MovementState.sprinting)
             {
-                stamina.StartDrainingStamina(sprintCost);
+                staminaBar.StartDrainingStamina(sprintCost);
             }
             else
             {
-                stamina.StopDrainingStamina();
+                staminaBar.StopDrainingStamina();
             }
         }
 

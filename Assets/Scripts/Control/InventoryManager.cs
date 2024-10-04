@@ -18,6 +18,7 @@ namespace Forest.Inventory
         [SerializeField] float dropForce;
 
         [Header("References")]
+        [SerializeField] GameObject player;
         [SerializeField] Transform dropOrigin;
         [SerializeField] Transform facingDirection;
         Transform cameraTransform;
@@ -44,7 +45,7 @@ namespace Forest.Inventory
         {
             if (Instance != null && Instance != this)
             {
-                Destroy(gameObject);
+                Destroy(this);
                 return;
             }
 
@@ -139,7 +140,7 @@ namespace Forest.Inventory
         {
             Rigidbody itemRb = itemToDrop.gameObject.GetComponent<Rigidbody>();
 
-            itemRb.velocity = GetComponent<Rigidbody>().velocity; // Make gObject inherit the player's current velocity
+            itemRb.velocity = player.GetComponent<Rigidbody>().velocity; // Make gObject inherit the player's current velocity
 
             Vector3 dropVector = cameraTransform.forward * dropForce; 
             itemRb.AddForce(dropVector, ForceMode.Impulse); // Throw gObject

@@ -1,26 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Build;
 using UnityEngine;
 using Forest.Interaction;
-using System;
 
 namespace Forest.Inventory
 {
+    [RequireComponent(typeof(HoverEffect))]
     public class InventoryItem : MonoBehaviour, IInteractable
     {
+        [SerializeField] bool _active;
+        static InventoryItem _currentlyActiveInstance;
+
+        HoverEffect hoverEffect;
         public string description;
         public bool canBePickedUp = true;
-        public bool isHovering;
-
-        static InventoryItem _currentlyActiveInstance;
-        [SerializeField] bool _active;
-
-        Renderer[] childRenderers;
-        Color originalEmissionColor;
-
-        public Color glowColor = Color.white;
-        public float glowIntensity = 1.5f;
 
         public bool Active // This property will ensure that only one InventoryItem will ever be active at a time
         {
@@ -51,12 +42,7 @@ namespace Forest.Inventory
 
         void Awake()
         {
-            childRenderers = GetComponentsInChildren<Renderer>();
-
-            if (childRenderers.Length > 0 && childRenderers[0].material.HasProperty("_EmissionColor"))
-            {
-                originalEmissionColor = childRenderers[0].material.GetColor("_EmissionColor");
-            }
+            hoverEffect = GetComponent<HoverEffect>();
         }
 
         public void Interact()
@@ -65,34 +51,6 @@ namespace Forest.Inventory
             if (canBePickedUp) { PickUp(); }
             else { Debug.Log("This item cannot be picked up!"); }
         }
-
-        // public void OnHover(bool hovering)
-        // {
-        //     isHovering = hovering;
-
-        //     if (isHovering)
-        //     {
-        //         foreach (Renderer renderer in childRenderers)
-        //         {
-        //             if (renderer.material.HasProperty("_EmissionColor"))
-        //             {
-        //                 renderer.material.SetColor("_EmissionColor", glowColor * glowIntensity);
-        //                 renderer.material.EnableKeyword("_EMISSION");
-        //             }
-        //         }
-        //     }
-        //     else
-        //     {
-        //         foreach (Renderer renderer in childRenderers)
-        //         {
-        //             if (renderer.material.HasProperty("_EmissionColor"))
-        //             {
-        //                 renderer.material.SetColor("_EmissionColor", originalEmissionColor);
-        //                 renderer.material.DisableKeyword("_EMISSION"); // Turn off emission
-        //             }
-        //         }
-        //     }
-        // }
 
         void PickUp()
         {
@@ -105,7 +63,7 @@ namespace Forest.Inventory
             catch {}
             InventoryManager.Instance.AddItem(this);
             gameObject.SetActive(false);
+            hoverEffect.StopHoverEffect();
         }
     }
 }
-

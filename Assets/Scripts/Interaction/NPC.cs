@@ -11,11 +11,6 @@ namespace Forest.Interaction
         {
             print("NPC");
         }
-
-        public void OnHover(bool hovering)
-        {
-            
-        }
     }
 }
 
