@@ -1,12 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Forest.AI
 {
     public class Waypoint : MonoBehaviour
     {
-        [Tooltip("Waypoint ID must match enemy ID")] [SerializeField] int waypointID;
+        [Tooltip("Waypoint ID must match NPC ID")] public int waypointID;
+        public float timeToSpend;
+        public bool randomizeTime;
+        public float minRandomTime;
+        public float maxRandomTime;
+
+        public float GetStopTime()
+        {
+            if (!randomizeTime) { return timeToSpend; }
+
+            return Random.Range(minRandomTime, maxRandomTime);
+        }
     }
 }
 
