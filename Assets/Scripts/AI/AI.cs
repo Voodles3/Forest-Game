@@ -25,6 +25,11 @@ namespace Forest.AI
         {
             FindNextWaypoint();
         }
+
+        void Update()
+        {
+            UpdateAnimator();
+        }
         
         void CreateWaypointList()
         {
@@ -67,6 +72,14 @@ namespace Forest.AI
             {
                 StartCoroutine(PauseAtWaypoint());
             }
+        }
+
+        void UpdateAnimator()
+        {
+            Vector3 velocity = agent.velocity; // Current speed of NavMesh Agent
+            Vector3 localVelocity = transform.InverseTransformDirection(velocity); // Changing velocity from world space to local
+            float speed = localVelocity.z / agent.speed;
+            GetComponent<Animator>().SetFloat("forwardSpeed", speed); // Setting Blend Tree value based on forward speed
         }
 
     }
