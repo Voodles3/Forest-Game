@@ -9,7 +9,7 @@ namespace Forest.Movement
         [SerializeField] float sensitivity = 100f;
         //[SerializeField] float smoothTime = 0.1f;
 
-        [SerializeField] Transform orientation;
+        [SerializeField] Transform facingDirection;
 
         PlayerActions inputActions;
         InputAction lookAction;
@@ -55,7 +55,7 @@ namespace Forest.Movement
             pitch = Mathf.Clamp(pitch, -90f, 90f);
 
             transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
-            orientation.rotation = Quaternion.Euler(0f, yaw, 0f);
+            facingDirection.rotation = Quaternion.Euler(0f, yaw, 0f);
         }
 
         void OnEnable()

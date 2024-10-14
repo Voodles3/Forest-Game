@@ -297,8 +297,8 @@ MonoBehaviour:
   jumpPeakGravity: 0
   gravity: 2
   grounded: 0
-  sprintCost: 10
-  jumpCost: 20
+  sprintCost: 8
+  jumpCost: 16
   orientation: {fileID: 2637305423762101407}
   playerBody: {fileID: 6924412883047951995}
   playerMaterial: {fileID: 13400000, guid: 3e8c02fba8667d7429685c4c31c44198, type: 2}
