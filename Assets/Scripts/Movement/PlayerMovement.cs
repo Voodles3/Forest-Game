@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Forest.UI;
+using UnityEditor.Rendering.LookDev;
 
 namespace Forest.Movement
 {
@@ -23,6 +24,7 @@ namespace Forest.Movement
         float moveSpeed;
         bool dragTransitioning;
         bool canAccelerate = true;
+        public bool isMoving;
 
         [Header("Jumping")]
         [SerializeField] float jumpForce;
@@ -31,8 +33,19 @@ namespace Forest.Movement
         [SerializeField] float fallGravity;
         [SerializeField] float jumpPeakGravity;
         [SerializeField] float gravity;
-        [SerializeField] bool grounded;
+        public bool grounded;
         bool readyToJump = true;
+
+        [Header("View Bobbing")]
+        [SerializeField] float crouchBobSpeed;
+        [SerializeField] float walkBobSpeed;
+        [SerializeField] float sprintBobSpeed;
+
+        [Header("FOV")]
+        [SerializeField] float walkFOV;
+        [SerializeField] float sprintFOV;
+        [SerializeField] float FOVTransitionTime;
+        float targetFOV;
 
         [Header("Stamina")]
         [SerializeField] float sprintCost;
@@ -43,6 +56,7 @@ namespace Forest.Movement
         [SerializeField] Transform playerBody;
         [SerializeField] PhysicMaterial playerMaterial;
         [SerializeField] LayerMask groundMask;
+        PlayerLook look;
         Animator animator;
         StaminaBar staminaBar;
 
@@ -76,6 +90,7 @@ namespace Forest.Movement
             crouchAction = inputActions.Gameplay.Crouch;
             animator = GetComponent<Animator>();
             staminaBar = FindObjectOfType<StaminaBar>();
+            look = FindObjectOfType<PlayerLook>();
         }
 
         void Start()
@@ -87,6 +102,8 @@ namespace Forest.Movement
 
         void Update()
         {
+            IsMoving();
+            ChangeFOV();
             ReceiveInput();
             StateHandler();
             LimitSpeed();
@@ -101,22 +118,47 @@ namespace Forest.Movement
             ApplyGravity();
         }
 
+        void IsMoving()
+        {
+            if (inputs.magnitude > 0f && rb.velocity.magnitude > 0.5f)
+            {
+                isMoving = true;
+            }
+            else
+            {
+                isMoving = false;
+            }
+        }
+
+        void ChangeFOV()
+        {
+            Camera.main.fieldOfView = Mathf.Lerp(Camera.main.fieldOfView, targetFOV, Time.deltaTime / FOVTransitionTime);
+        }
+
         void StateHandler()
         {
             if (crouchAction.ReadValue<float>() > 0f)
             {
                 currentMovementState = MovementState.crouching;
+
                 moveSpeed = crouchSpeed;
+                look.currentBobSpeed = crouchBobSpeed;
             }
-            else if (staminaBar.currentStamina > 0f && grounded && sprintAction.ReadValue<float>() > 0f && inputs.magnitude > 0f && rb.velocity.magnitude > 1f)
+            else if (staminaBar.currentStamina > 0f && grounded && sprintAction.ReadValue<float>() > 0f && isMoving)
             {
                 currentMovementState = MovementState.sprinting;
+
                 moveSpeed = sprintSpeed;
+                look.currentBobSpeed = sprintBobSpeed;
+                targetFOV = sprintFOV;
             }
             else if (grounded)
             {
                 currentMovementState = MovementState.walking;
+
                 moveSpeed = walkSpeed;
+                look.currentBobSpeed = walkBobSpeed;
+                targetFOV = walkFOV;
             }
             else
             {

@@ -280,7 +280,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 5
-  crouchSpeed: 5
+  crouchSpeed: 2.5
   sprintSpeed: 8
   stopForce: 20
   groundDrag: 6
@@ -290,6 +290,7 @@ MonoBehaviour:
   dynamicFriction: 0.1
   staticFriction: 0.05
   currentMovementState: 0
+  isMoving: 0
   jumpForce: 20
   jumpCooldown: 0.4
   airSpeedMultiplier: 0.55
@@ -297,6 +298,12 @@ MonoBehaviour:
   jumpPeakGravity: 0
   gravity: 2
   grounded: 0
+  crouchBobSpeed: 6
+  walkBobSpeed: 12
+  sprintBobSpeed: 16
+  walkFOV: 70
+  sprintFOV: 80
+  FOVTransitionTime: 0.1
   sprintCost: 8
   jumpCost: 16
   orientation: {fileID: 2637305423762101407}

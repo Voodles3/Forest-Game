@@ -11,6 +11,12 @@ namespace Forest.Movement
 
         [SerializeField] Transform facingDirection;
 
+        [SerializeField] float bobAmount;
+        public float currentBobSpeed;
+        float bobTimer;
+        float defaultPosY;
+
+        PlayerMovement playerMovement;
         PlayerActions inputActions;
         InputAction lookAction;
 
@@ -24,16 +30,19 @@ namespace Forest.Movement
         {
             inputActions = new PlayerActions();
             lookAction = inputActions.Camera.Look;
+            playerMovement = FindObjectOfType<PlayerMovement>();
         }
 
         void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
+            defaultPosY = transform.localPosition.y;
         }
 
         void Update()
         {
             Look();
+            ViewBobbing();
         }
 
         void Look()
@@ -56,6 +65,20 @@ namespace Forest.Movement
 
             transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
             facingDirection.rotation = Quaternion.Euler(0f, yaw, 0f);
+        }
+
+        void ViewBobbing()
+        {
+            if (playerMovement.grounded && playerMovement.isMoving)
+            {
+                bobTimer += Time.deltaTime * currentBobSpeed;
+                transform.localPosition = new Vector3(transform.localPosition.x, defaultPosY + Mathf.Sin(bobTimer) * bobAmount, transform.localPosition.z);
+            }
+            else
+            {
+                bobTimer = 0;
+                transform.localPosition = new Vector3(transform.localPosition.x, Mathf.Lerp(transform.localPosition.y, defaultPosY, Time.deltaTime * currentBobSpeed * 2));
+            }
         }
 
         void OnEnable()

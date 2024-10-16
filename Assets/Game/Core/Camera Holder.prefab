@@ -154,7 +154,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sensitivity: 2
-  orientation: {fileID: 0}
+  facingDirection: {fileID: 0}
+  bobAmount: 0.08
+  currentBobSpeed: 0
 --- !u!114 &8295824677112578120
 MonoBehaviour:
   m_ObjectHideFlags: 0
