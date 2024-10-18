@@ -4,7 +4,7 @@ namespace Forest.AI
 {
     public class Waypoint : MonoBehaviour
     {
-        [Tooltip("Waypoint ID must match NPC ID")] public int waypointID;
+        [Tooltip("Waypoint ID must match Agent ID")] public int waypointID;
         public float timeToSpend;
         public bool randomizeTime;
         public float minRandomTime;

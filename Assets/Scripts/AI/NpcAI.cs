@@ -5,9 +5,9 @@ using UnityEngine.AI;
 
 namespace Forest.AI
 {
-    public class AI : MonoBehaviour
+    public class NpcAI : MonoBehaviour
     {
-        [Tooltip("NPC ID must match waypoint ID")] [SerializeField] int npcID;
+        [Tooltip("NPC ID must match waypoint ID")] [SerializeField] int ID;
 
         List<Waypoint> waypoints = new();
         System.Random random = new();
@@ -37,7 +37,7 @@ namespace Forest.AI
 
             foreach (Waypoint waypoint in allWaypoints)
             {
-                if (waypoint.waypointID == npcID)
+                if (waypoint.waypointID == ID)
                 {
                     waypoints.Add(waypoint);
                 }
@@ -53,7 +53,6 @@ namespace Forest.AI
                 FindNextWaypoint();
                 return;
             }
-
             currentWaypoint = nextWaypoint;
             agent.destination = currentWaypoint.transform.position;
         }
