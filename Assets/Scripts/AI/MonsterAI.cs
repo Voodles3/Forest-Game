@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using Forest.Movement;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -13,18 +13,21 @@ namespace Forest.AI
         [Tooltip("Monster ID must match waypoint ID")] [SerializeField] int ID;
         [SerializeField] State currentState = State.patrolling;
         
-        [Tooltip("View Distance when Patrolling")][SerializeField] float patrolVD;
-        [Tooltip("View Distance when Suspicious")][SerializeField] float suspiciousVD;
-        [Tooltip("View Distance when Chasing and Searching")][SerializeField] float chaseVD;
+        [Tooltip("View Distance when Patrolling")] [SerializeField] float patrolVD;
+        [Tooltip("View Distance when Suspicious")] [SerializeField] float suspiciousVD;
+        [Tooltip("View Distance when Chasing and Searching")] [SerializeField] float chaseVD;
+
         float viewDistance;
-        Vector3 boxSize;
-        float boxDistance = 3.5f;
+        Vector3 sightBox;
+        float sightBoxOffset = 3.5f;
+
+        [SerializeField] TextMeshProUGUI sightText;
+        [SerializeField] Transform monsterHead;
 
         List<Waypoint> waypoints = new();
         NavMeshAgent agent;
         Waypoint currentWaypoint;
         Transform playerTransform;
-        [SerializeField] TextMeshProUGUI sightText;
 
         readonly System.Random random = new();
         
@@ -46,8 +49,8 @@ namespace Forest.AI
 
         void Start()
         {
-            boxSize = new(15, 5, patrolVD);
-            boxDistance = transform.localScale.z - 0.5f + boxSize.z / 2;
+            sightBox = new(15, 5, patrolVD);
+            sightBoxOffset = transform.localScale.z - 0.5f + sightBox.z / 2;
             FindNextWaypoint();
         }
 
@@ -61,40 +64,46 @@ namespace Forest.AI
         {
             if (currentState == State.patrolling)
             {
-                viewDistance = patrolVD;
-                boxSize.z = patrolVD;
+                sightBox.z = patrolVD;
             }
             else if (currentState == State.suspicious)
             {
-                viewDistance = suspiciousVD;
-                boxSize.z = suspiciousVD;
+                sightBox.z = suspiciousVD;
             }
             else if (currentState == State.chasing)
             {
-                viewDistance = chaseVD;
-                boxSize.z = chaseVD;
+                sightBox.z = chaseVD;
             }
             else if (currentState == State.searching)
             {   
-                viewDistance = chaseVD;
-                boxSize.z = chaseVD;
+                sightBox.z = chaseVD;
+            }
+        }
+
+        void OnTriggerEnter(Collider other)
+        {
+            other.TryGetComponent(out Waypoint waypoint);
+
+            if (waypoint == currentWaypoint)
+            {
+                StartCoroutine(PauseAtWaypoint());
             }
         }
 
         void CheckSightRange()
         {
-            Vector3 boxCenter = transform.position + transform.forward * boxDistance;
+            Vector3 boxCenter = transform.position + transform.forward * sightBoxOffset;
 
-            Collider[] hits = Physics.OverlapBox(boxCenter, boxSize / 2, transform.rotation);
+            Collider[] hits = Physics.OverlapBox(boxCenter, sightBox / 2, transform.rotation);
             bool playerInSight = false;
             foreach (Collider hit in hits)
             {
                 if (hit.transform == playerTransform)
                 {
-                    Debug.Log("Player is in sight!");
-                    playerInSight = true;
+                    StartChase();
                 }
             }
+
             if (playerInSight)
             {
                 sightText.text = "Player in sight";
@@ -108,14 +117,22 @@ namespace Forest.AI
             sightText.transform.SetPositionAndRotation(transform.position + Vector3.up * 2, Camera.main.transform.rotation);
         }
 
+        bool GetPlayerInLOS()
+        {
+            Physics.Raycast(monsterHead.position, transform.forward, out RaycastHit hit);
+            if (hit.transform == playerTransform) { return true; }
+            return false;
+        }
+
         void OnDrawGizmosSelected()
         {
-            boxDistance = transform.localScale.z - 0.5f + 5;
-            Vector3 boxCenter = transform.position + transform.forward * boxDistance;
+            sightBoxOffset = transform.localScale.z - 0.5f + 5;
+            Vector3 boxCenter = transform.position + transform.forward * sightBoxOffset;
             Gizmos.color = Color.red;
             Gizmos.DrawWireCube(boxCenter, new(15, 5, patrolVD));
         }
         
+        #region Patrolling
         void CreateWaypointList()
         {
             Waypoint[] allWaypoints = FindObjectsByType<Waypoint>(FindObjectsSortMode.None);
@@ -144,18 +161,22 @@ namespace Forest.AI
 
         IEnumerator PauseAtWaypoint()
         {
-            yield return new WaitForSeconds(currentWaypoint.GetStopTime());
+            yield return new WaitForSeconds(currentWaypoint.GetPauseTime());
             FindNextWaypoint();
         }
+        #endregion
 
-        void OnTriggerEnter(Collider other)
+        void StartChase()
         {
-            other.TryGetComponent(out Waypoint waypoint);
 
-            if (waypoint == currentWaypoint)
-            {
-                StartCoroutine(PauseAtWaypoint());
-            }
+        }
+        IEnumerator Chase()
+        {
+            yield return null;
+            currentState = State.chasing;
+            sightBox.z = 100f;
+
+
         }
     }
 }

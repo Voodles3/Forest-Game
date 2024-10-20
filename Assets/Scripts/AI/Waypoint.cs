@@ -10,7 +10,7 @@ namespace Forest.AI
         public float minRandomTime;
         public float maxRandomTime;
 
-        public float GetStopTime()
+        public float GetPauseTime()
         {
             if (!randomizeTime) { return timeToSpend; }
 

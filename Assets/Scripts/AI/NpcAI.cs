@@ -59,7 +59,7 @@ namespace Forest.AI
 
         IEnumerator PauseAtWaypoint()
         {
-            yield return new WaitForSeconds(currentWaypoint.GetStopTime());
+            yield return new WaitForSeconds(currentWaypoint.GetPauseTime());
             FindNextWaypoint();
         }
 
