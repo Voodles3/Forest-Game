@@ -51,6 +51,12 @@ namespace Forest.Movement
         [SerializeField] float sprintCost;
         [SerializeField] float jumpCost;
 
+        [Header("Noise")]
+        [SerializeField] float crouchNoise;
+        [SerializeField] float walkNoise;
+        [SerializeField] float sprintNoise;
+        float currentNoiseRadius;
+
         [Header("References")]
         [SerializeField] Transform orientation;
         [SerializeField] Transform playerBody;
@@ -81,6 +87,11 @@ namespace Forest.Movement
         {
             get { return currentMovementState; }
         }
+        public float CurrentNoiseRadius
+        {
+            get { return currentNoiseRadius; }
+        }
+
 
         void Awake()
         {
@@ -105,7 +116,7 @@ namespace Forest.Movement
             IsMoving();
             ChangeFOV();
             ReceiveInput();
-            StateHandler();
+            SetState();
             LimitSpeed();
             ApplyDrag();
             ApplyStopForce();
@@ -135,7 +146,7 @@ namespace Forest.Movement
             Camera.main.fieldOfView = Mathf.Lerp(Camera.main.fieldOfView, targetFOV, Time.deltaTime / FOVTransitionTime);
         }
 
-        void StateHandler()
+        void SetState()
         {
             if (crouchAction.ReadValue<float>() > 0f)
             {
@@ -143,6 +154,7 @@ namespace Forest.Movement
 
                 moveSpeed = crouchSpeed;
                 look.currentBobSpeed = crouchBobSpeed;
+                currentNoiseRadius = crouchNoise;
             }
             else if (staminaBar.currentStamina > 0f && grounded && sprintAction.ReadValue<float>() > 0f && isMoving)
             {
@@ -151,6 +163,7 @@ namespace Forest.Movement
                 moveSpeed = sprintSpeed;
                 look.currentBobSpeed = sprintBobSpeed;
                 targetFOV = sprintFOV;
+                currentNoiseRadius = sprintNoise;
             }
             else if (grounded)
             {
@@ -159,6 +172,7 @@ namespace Forest.Movement
                 moveSpeed = walkSpeed;
                 look.currentBobSpeed = walkBobSpeed;
                 targetFOV = walkFOV;
+                currentNoiseRadius = walkNoise;
             }
             else
             {

@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using Forest.Movement;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
+using Forest.Core;
+using Forest.Movement;
 
 namespace Forest.AI
 {
@@ -12,10 +13,12 @@ namespace Forest.AI
         [SerializeField] State currentState = State.patrolling;
         [SerializeField] bool playerInLOS;
         [SerializeField] bool playerInSightBox;
+        [SerializeField] bool playerInNoiseRadius;
 
         [Header("General")]
         [Tooltip("Monster ID must match waypoint ID")] [SerializeField] int ID;
         [SerializeField] float maxLOSRange;
+        [SerializeField] float deathRange;
 
         [Header("Patrolling")]
         [Tooltip("View Distance when Patrolling")] [SerializeField] float patrolVD;
@@ -24,6 +27,8 @@ namespace Forest.AI
         [Header("Suspicious")]
         [Tooltip("View Distance when Suspicious")] [SerializeField] float suspiciousVD;
         [SerializeField] float suspiciousSpeed;
+        [SerializeField] float suspiciousStartDelay;
+        [SerializeField] float suspiciousWaitTime;
 
         [Header("Chasing")]
         [Tooltip("View Distance when Chasing and Searching")] [SerializeField] float chaseVD;
@@ -42,10 +47,14 @@ namespace Forest.AI
 
         Vector3 sightBox;
         float sightBoxOffset = 3.5f;
+        float distanceFromPlayer;
+        [SerializeField] bool arrived;
 
         List<Waypoint> waypoints = new();
         NavMeshAgent agent;
         Waypoint currentWaypoint;
+        DeathHandler deathHandler;
+        PlayerMovement playerMovement;
         Collider playerCol;
 
         readonly System.Random random = new();
@@ -61,14 +70,16 @@ namespace Forest.AI
         void Awake()
         {
             agent = GetComponent<NavMeshAgent>();
-            playerCol = FindObjectOfType<PlayerMovement>().GetComponentInChildren<Collider>();
+            deathHandler = FindObjectOfType<DeathHandler>();
+            playerMovement = FindObjectOfType<PlayerMovement>();
+            playerCol = deathHandler.GetComponentInChildren<Collider>();
 
             CreateWaypointList();
         }
 
         void Start()
         {
-            sightBox = new(20, 5, patrolVD);
+            sightBox = new(patrolVD * 2, 5, patrolVD);
             sightBoxOffset = transform.localScale.z - 0.5f + sightBox.z / 2;
             GoToNextWaypoint();
         }
@@ -78,6 +89,8 @@ namespace Forest.AI
             StateHandler();
             CheckPlayerInLOS();
             CheckPlayerInSightBox();
+            CheckNoiseRadius();
+            CheckPlayerDistance();
             UpdateAnimator();
         }
 
@@ -119,7 +132,7 @@ namespace Forest.AI
                     if (playerInLOS && currentState != State.chasing)
                     {
                         StopAllCoroutines();
-                        StartCoroutine(Chase());
+                        StartCoroutine(Chase(true));
                         Debug.Log("Start chasing!");
                     }
                     break; // Exit the loop once the player is found
@@ -138,6 +151,26 @@ namespace Forest.AI
             playerInLOS = hit.collider == playerCol; // Player is in LOS if hit.collider is playerCol
         }
 
+        void CheckNoiseRadius()
+        {
+            if (distanceFromPlayer <= playerMovement.CurrentNoiseRadius && playerMovement.isMoving)
+            {
+                playerInNoiseRadius = true;
+
+                if (currentState == State.patrolling)
+                {
+                    Debug.Log("Heard something, going to investigate...");
+                    currentState = State.suspicious;
+                    StopAllCoroutines();
+                    StartCoroutine(Suspicious(true));
+                }
+            }
+            else
+            {
+                playerInNoiseRadius = false;
+            }
+        }
+
         void SightText()
         {
             if (playerInSightBox && playerInLOS)
@@ -152,30 +185,76 @@ namespace Forest.AI
             }
             sightText.transform.SetPositionAndRotation(transform.position + Vector3.up * sightTextOffset, Camera.main.transform.rotation);
         }
-
-        void OnDrawGizmosSelected()
+        
+        //DISABLED THIS FOR NOW, CAUSED WEIRD MEMORY LEAK ISSUES
+        /*void OnDrawGizmosSelected()
         {
             sightBoxOffset = transform.localScale.z - 0.5f + 5;
             Vector3 boxCenter = transform.position + transform.forward * sightBoxOffset;
             Gizmos.color = Color.red;
             Gizmos.DrawWireCube(boxCenter, new(20, 5, 10));
+        }*/
+
+        IEnumerator Suspicious(bool delay)
+        {
+            agent.ResetPath();
+            Vector3 noisePosition = playerCol.transform.position;
+
+            if (delay)
+            {
+                float endTime = Time.time + suspiciousStartDelay;
+                while (Time.time < endTime)
+                {
+                    Vector3 direction = (playerCol.transform.position - transform.position).normalized;
+                    Quaternion targetRotation = Quaternion.LookRotation(direction);
+
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
+                    yield return null;
+                }
+            }
+            agent.destination = noisePosition;
+
+            while (playerInNoiseRadius)
+            {
+                agent.destination = playerCol.transform.position;
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            while (agent.hasPath)
+            {
+                if (playerInNoiseRadius)
+                {
+                    StartCoroutine(Suspicious(false));
+                    yield break;
+                }
+                yield return null;
+            }
+            yield return new WaitForSeconds(suspiciousWaitTime);
+
+            Debug.Log("Gave up, going back to patrolling");
+            currentState = State.patrolling;
+            GoToClosestWaypoint();
         }
 
-        IEnumerator Chase()
+        IEnumerator Chase(bool delay)
         {
             currentState = State.chasing;
             agent.ResetPath();
 
-            float endTime = Time.time + chaseStartDelay;
-            while (Time.time < endTime)
+            if (delay)
             {
-                Vector3 direction = (playerCol.transform.position - transform.position).normalized;
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                float endTime = Time.time + chaseStartDelay;
+                while (Time.time < endTime)
+                {
+                    Vector3 direction = (playerCol.transform.position - transform.position).normalized;
+                    Quaternion targetRotation = Quaternion.LookRotation(direction);
 
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 20f * Time.deltaTime);
-                yield return null;
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 20f * Time.deltaTime);
+                    yield return null;
+                }
             }
-            yield return new WaitForSeconds(chaseStartDelay);
+            
+            agent.destination = playerCol.transform.position;
 
             while (playerInLOS)
             {
@@ -187,13 +266,13 @@ namespace Forest.AI
             {
                 if (playerInLOS) // If player gets in LOS again while he's traveling to last known position, he starts chasing again
                 {
-                    StartCoroutine(Chase());
+                    StartCoroutine(Chase(false));
                     yield break;
                 }
                 yield return null;
             }
             // Player went out of LOS, and he has reached their last known position
-            Debug.Log("Reached player's last known position, starting to search");
+            //Debug.Log("Reached player's last known position, starting to search");
 
             StartCoroutine(Search());
         }
@@ -201,11 +280,41 @@ namespace Forest.AI
         IEnumerator Search()
         {
             currentState = State.searching;
-            yield return new WaitForSeconds(searchTime); // TODO: Make monster look around while he waits here
+
+            float endTime = Time.time + searchTime;
+            while (Time.time < endTime)
+            {
+                if (playerInNoiseRadius)
+                {
+                    StartCoroutine(Chase(false));
+                    yield break;
+                }
+                yield return null;
+            }
+            // TODO: Make monster look around while he searches
 
             Debug.Log("Gave up, going back to patrolling");
             currentState = State.patrolling;
             GoToClosestWaypoint();
+        }
+
+        void CheckPlayerDistance()
+        {
+            distanceFromPlayer = Vector3.Distance(transform.position, playerCol.transform.position);
+
+            if (distanceFromPlayer <= deathRange)
+            {
+                currentState = State.patrolling;
+                StopAllCoroutines();
+                GoToClosestWaypoint();
+
+                KillPlayer();
+            }
+        }
+
+        void KillPlayer()
+        {
+            deathHandler.Die();
         }
         
         #region Patrolling
@@ -226,13 +335,17 @@ namespace Forest.AI
         {
             Waypoint nextWaypoint = waypoints[random.Next(waypoints.Count)];
 
-            if (nextWaypoint == currentWaypoint)
+            if (nextWaypoint != currentWaypoint)
+            {
+                currentWaypoint = nextWaypoint;
+                agent.destination = currentWaypoint.transform.position;
+                arrived = false;
+            }
+            else
             {
                 GoToNextWaypoint();
-                return;
             }
-            currentWaypoint = nextWaypoint;
-            agent.destination = currentWaypoint.transform.position;
+            
         }
 
         void GoToClosestWaypoint()
@@ -250,20 +363,23 @@ namespace Forest.AI
             agent.destination = currentWaypoint.transform.position;
         }
 
+        void OnTriggerEnter(Collider other)
+        {
+            //float distance = Vector3.Distance(transform.position, currentWaypoint.transform.position);
+            other.TryGetComponent(out Waypoint waypoint);
+
+            if (waypoint == currentWaypoint && currentState == State.patrolling && !arrived)
+            {
+                Debug.Log("Arrived at next waypoint");
+                arrived = true;
+                StartCoroutine(PauseAtWaypoint());
+            }
+        }
+
         IEnumerator PauseAtWaypoint()
         {
             yield return new WaitForSeconds(currentWaypoint.GetPauseTime());
             GoToNextWaypoint();
-        }
-
-        void OnTriggerEnter(Collider other)
-        {
-            other.TryGetComponent(out Waypoint waypoint);
-
-            if (waypoint == currentWaypoint && currentState == State.patrolling)
-            {
-                StartCoroutine(PauseAtWaypoint());
-            }
         }
         #endregion
 
