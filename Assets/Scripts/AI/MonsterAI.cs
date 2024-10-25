@@ -12,28 +12,31 @@ namespace Forest.AI
     {
         [SerializeField] State currentState = State.patrolling;
         [SerializeField] bool playerInLOS;
-        [SerializeField] bool playerInSightBox;
+        [SerializeField] bool playerInSight;
         [SerializeField] bool playerInNoiseRadius;
 
         [Header("General")]
         [Tooltip("Monster ID must match waypoint ID")] [SerializeField] int ID;
+        [SerializeField] float viewAngle;
         [SerializeField] float maxLOSRange;
         [SerializeField] float deathRange;
 
         [Header("Patrolling")]
-        [Tooltip("View Distance when Patrolling")] [SerializeField] float patrolVD;
+        [Tooltip("View Distance when Patrolling")] [SerializeField] float patrolRadius;
         [SerializeField] float patrolSpeed;
 
         [Header("Suspicious")]
-        [Tooltip("View Distance when Suspicious")] [SerializeField] float suspiciousVD;
+        [Tooltip("View Distance when Suspicious")] [SerializeField] float susRadius;
+        [Tooltip("Time to stare at sound before investigating")] [SerializeField] float suspiciousStartDelay;
         [SerializeField] float suspiciousSpeed;
-        [SerializeField] float suspiciousStartDelay;
         [SerializeField] float suspiciousWaitTime;
+        [SerializeField] float noiseCheckInterval = 0.5f;
 
         [Header("Chasing")]
-        [Tooltip("View Distance when Chasing and Searching")] [SerializeField] float chaseVD;
+        [Tooltip("View Distance when Chasing and Searching")] [SerializeField] float chaseRadius;
+        [Tooltip("Time to stare at player before chasing")] [SerializeField] float chaseStartDelay;
         [SerializeField] float chaseSpeed;
-        [Tooltip("Time to stare at player before chasing")][SerializeField] float chaseStartDelay;
+        
 
         [Header("Searching")]
         [SerializeField] float searchTime;
@@ -45,10 +48,9 @@ namespace Forest.AI
         [SerializeField] TextMeshProUGUI sightText;
         [SerializeField] Transform monsterHead;
 
-        Vector3 sightBox;
-        float sightBoxOffset = 3.5f;
+        bool arrived;
         float distanceFromPlayer;
-        [SerializeField] bool arrived;
+        float noiseCheckTimer; 
 
         List<Waypoint> waypoints = new();
         NavMeshAgent agent;
@@ -79,8 +81,6 @@ namespace Forest.AI
 
         void Start()
         {
-            sightBox = new(patrolVD * 2, 5, patrolVD);
-            sightBoxOffset = transform.localScale.z - 0.5f + sightBox.z / 2;
             GoToNextWaypoint();
         }
 
@@ -88,7 +88,7 @@ namespace Forest.AI
         {
             StateHandler();
             CheckPlayerInLOS();
-            CheckPlayerInSightBox();
+            CheckPlayerInSight();
             CheckNoiseRadius();
             CheckPlayerDistance();
             UpdateAnimator();
@@ -98,54 +98,54 @@ namespace Forest.AI
         {
             if (currentState == State.patrolling)
             {
-                sightBox = new(patrolVD * 2, 5, patrolVD);
                 agent.speed = patrolSpeed;
             }
             else if (currentState == State.suspicious)
             {
-                sightBox = new(suspiciousVD * 2, 5, suspiciousVD);
                 agent.speed = suspiciousSpeed;
             }
             else if (currentState == State.chasing)
             {
-                sightBox = new(chaseVD * 2, 5, chaseVD);
                 agent.speed = chaseSpeed;
             }
             else if (currentState == State.searching)
             {   
-                sightBox = new(chaseVD * 2, 5, chaseVD);
+                
             }
         }
 
-        void CheckPlayerInSightBox()
+        void CheckPlayerInSight()
         {
-            Vector3 boxCenter = transform.position + transform.forward * sightBoxOffset;
-            Collider[] hits = Physics.OverlapBox(boxCenter, sightBox / 2, transform.rotation);
-            bool playerFound = false;
+            Collider[] hits = Physics.OverlapSphere(transform.position, GetDetectionRadiusForState());
+            bool playerSeen = false;
 
             foreach (Collider hit in hits)
             {
                 if (hit.transform == playerCol.transform)
                 {
-                    playerFound = true;
+                    float dotProduct = Vector3.Dot(transform.forward, GetDirectionToPlayer());
 
-                    if (playerInLOS && currentState != State.chasing)
+                    if (dotProduct > Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad))
                     {
-                        StopAllCoroutines();
-                        StartCoroutine(Chase(true));
-                        Debug.Log("Start chasing!");
+                        playerSeen = true;
+
+                        if (playerInLOS && currentState != State.chasing)
+                        {
+                            StopAllCoroutines();
+                            StartCoroutine(Chase(true));
+                            Debug.Log("Start chasing!");
+                        }
+                        break; // Exit the loop once the player is found
                     }
-                    break; // Exit the loop once the player is found
                 }
             }
-            playerInSightBox = playerFound;
+            playerInSight = playerSeen;
             SightText();
         }
 
         void CheckPlayerInLOS()
         {
-            Vector3 directionToPlayer = (playerCol.transform.position - monsterHead.position).normalized;
-            Ray ray = new(monsterHead.position, directionToPlayer);
+            Ray ray = new(monsterHead.position, GetDirectionToPlayer());
             Physics.Raycast(ray, out RaycastHit hit, maxLOSRange);
 
             playerInLOS = hit.collider == playerCol; // Player is in LOS if hit.collider is playerCol
@@ -153,9 +153,12 @@ namespace Forest.AI
 
         void CheckNoiseRadius()
         {
-            if (distanceFromPlayer <= playerMovement.CurrentNoiseRadius && playerMovement.isMoving)
+            noiseCheckTimer += Time.deltaTime;
+
+            if (noiseCheckTimer >= noiseCheckInterval && distanceFromPlayer <= playerMovement.CurrentNoiseRadius && playerMovement.isMoving)
             {
                 playerInNoiseRadius = true;
+                noiseCheckTimer = 0f;
 
                 if (currentState == State.patrolling)
                 {
@@ -171,9 +174,25 @@ namespace Forest.AI
             }
         }
 
+        Vector3 GetDirectionToPlayer()
+        {
+            return (playerCol.transform.position - monsterHead.position).normalized;
+        }
+
+        float GetDetectionRadiusForState()
+        {
+            return currentState switch
+            {
+                State.patrolling => patrolRadius,
+                State.suspicious => susRadius,
+                State.chasing or State.searching => chaseRadius,
+                _ => patrolRadius,
+            };
+        }
+
         void SightText()
         {
-            if (playerInSightBox && playerInLOS)
+            if (playerInSight && playerInLOS)
             {
                 sightText.text = "Player in sight";
                 sightText.color = Color.green;
@@ -186,14 +205,28 @@ namespace Forest.AI
             sightText.transform.SetPositionAndRotation(transform.position + Vector3.up * sightTextOffset, Camera.main.transform.rotation);
         }
         
-        //DISABLED THIS FOR NOW, CAUSED WEIRD MEMORY LEAK ISSUES
-        /*void OnDrawGizmosSelected()
+        void OnDrawGizmosSelected()
         {
-            sightBoxOffset = transform.localScale.z - 0.5f + 5;
-            Vector3 boxCenter = transform.position + transform.forward * sightBoxOffset;
+            // Get the dynamic detection radius based on the current state
+            float radius = GetDetectionRadiusForState();
+
+            // Set the color and draw the detection radius sphere
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, radius);
+
+            // Draw the FOV cone
             Gizmos.color = Color.red;
-            Gizmos.DrawWireCube(boxCenter, new(20, 5, 10));
-        }*/
+            Vector3 forwardDirection = transform.forward * radius; // Extend based on radius
+            Quaternion leftRayRotation = Quaternion.AngleAxis(-viewAngle * 0.5f, Vector3.up);
+            Quaternion rightRayRotation = Quaternion.AngleAxis(viewAngle * 0.5f, Vector3.up);
+
+            Vector3 leftRayDirection = leftRayRotation * forwardDirection;
+            Vector3 rightRayDirection = rightRayRotation * forwardDirection;
+
+            // Draw both sides of the FOV cone
+            Gizmos.DrawRay(transform.position, leftRayDirection);
+            Gizmos.DrawRay(transform.position, rightRayDirection);
+        }
 
         IEnumerator Suspicious(bool delay)
         {
@@ -220,7 +253,7 @@ namespace Forest.AI
                 yield return new WaitForSeconds(0.1f);
             }
 
-            while (agent.hasPath)
+            while (agent.pathPending || (agent.hasPath && agent.remainingDistance > agent.stoppingDistance))
             {
                 if (playerInNoiseRadius)
                 {
@@ -239,10 +272,10 @@ namespace Forest.AI
         IEnumerator Chase(bool delay)
         {
             currentState = State.chasing;
-            agent.ResetPath();
 
             if (delay)
             {
+                agent.ResetPath();
                 float endTime = Time.time + chaseStartDelay;
                 while (Time.time < endTime)
                 {
@@ -261,8 +294,10 @@ namespace Forest.AI
                 agent.destination = playerCol.transform.position;
                 yield return new WaitForSeconds(0.1f);
             }
+
             // Player has gone out of LOS, but monster hasn't reached their last known position yet.
-            while (agent.hasPath)
+
+            while (agent.pathPending || (agent.hasPath && agent.remainingDistance > agent.stoppingDistance))
             {
                 if (playerInLOS) // If player gets in LOS again while he's traveling to last known position, he starts chasing again
                 {
@@ -370,7 +405,6 @@ namespace Forest.AI
 
             if (waypoint == currentWaypoint && currentState == State.patrolling && !arrived)
             {
-                Debug.Log("Arrived at next waypoint");
                 arrived = true;
                 StartCoroutine(PauseAtWaypoint());
             }
