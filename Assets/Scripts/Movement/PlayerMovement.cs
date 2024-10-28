@@ -51,6 +51,12 @@ namespace Forest.Movement
         [SerializeField] float sprintCost;
         [SerializeField] float jumpCost;
 
+        [Header("Visiblity")]
+        [SerializeField] float crouchVisibility;
+        [SerializeField] float walkVisibility;
+        [SerializeField] float sprintVisibility;
+        float currentVisiblity;
+
         [Header("Noise")]
         [SerializeField] float crouchNoise;
         [SerializeField] float walkNoise;
@@ -91,6 +97,10 @@ namespace Forest.Movement
         {
             get { return currentNoiseRadius; }
         }
+        public float CurrentVisibility
+        {
+            get { return currentVisiblity; }
+        }
 
 
         void Awake()
@@ -99,6 +109,7 @@ namespace Forest.Movement
             jumpAction = inputActions.Gameplay.Jump;
             sprintAction = inputActions.Gameplay.Sprint;
             crouchAction = inputActions.Gameplay.Crouch;
+            
             animator = GetComponent<Animator>();
             staminaBar = FindObjectOfType<StaminaBar>();
             look = FindObjectOfType<PlayerLook>();
@@ -154,6 +165,7 @@ namespace Forest.Movement
 
                 moveSpeed = crouchSpeed;
                 look.currentBobSpeed = crouchBobSpeed;
+                currentVisiblity = crouchVisibility;
                 currentNoiseRadius = crouchNoise;
             }
             else if (staminaBar.currentStamina > 0f && grounded && sprintAction.ReadValue<float>() > 0f && isMoving)
@@ -163,6 +175,7 @@ namespace Forest.Movement
                 moveSpeed = sprintSpeed;
                 look.currentBobSpeed = sprintBobSpeed;
                 targetFOV = sprintFOV;
+                currentVisiblity = sprintVisibility;
                 currentNoiseRadius = sprintNoise;
             }
             else if (grounded)
@@ -172,6 +185,7 @@ namespace Forest.Movement
                 moveSpeed = walkSpeed;
                 look.currentBobSpeed = walkBobSpeed;
                 targetFOV = walkFOV;
+                currentVisiblity = walkVisibility;
                 currentNoiseRadius = walkNoise;
             }
             else

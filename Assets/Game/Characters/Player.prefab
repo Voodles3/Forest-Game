@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 97500509100857375}
   - component: {fileID: 1368304280557541787}
   - component: {fileID: 679723814581886119}
-  m_Layer: 2
+  m_Layer: 3
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -128,7 +128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 790114934219725173}
-  m_Layer: 2
+  m_Layer: 3
   m_Name: Camera Position
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -159,7 +159,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2637305423762101407}
-  m_Layer: 2
+  m_Layer: 3
   m_Name: Facing Direction
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -193,7 +193,8 @@ GameObject:
   - component: {fileID: 1789579089666869803}
   - component: {fileID: 8067190605313225816}
   - component: {fileID: 5523800142021471471}
-  m_Layer: 2
+  - component: {fileID: 4227980053956805551}
+  m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -306,12 +307,31 @@ MonoBehaviour:
   FOVTransitionTime: 0.1
   sprintCost: 8
   jumpCost: 16
+  crouchVisibility: 5
+  walkVisibility: 10
+  sprintVisibility: 15
+  crouchNoise: 5
+  walkNoise: 20
+  sprintNoise: 30
   orientation: {fileID: 2637305423762101407}
   playerBody: {fileID: 6924412883047951995}
   playerMaterial: {fileID: 13400000, guid: 3e8c02fba8667d7429685c4c31c44198, type: 2}
   groundMask:
     serializedVersion: 2
     m_Bits: 64
+--- !u!114 &4227980053956805551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5880729118871779028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 546bf94c1a7b6cf4788638f915578447, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  respawnCoords: {x: 323, y: 0, z: 2}
 --- !u!1 &7650239640807952085
 GameObject:
   m_ObjectHideFlags: 0
@@ -324,7 +344,7 @@ GameObject:
   - component: {fileID: 5642075553338809384}
   - component: {fileID: 230143440170058198}
   - component: {fileID: 7291354108282002172}
-  m_Layer: 2
+  m_Layer: 3
   m_Name: Player Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}

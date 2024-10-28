@@ -1152,7 +1152,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
-  m_Intensity: 0.7
+  m_Intensity: 0.5
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -2244,7 +2244,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1164204119774400906, guid: 1ff4802adcf96fe4da4c8e69b98efbc9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1461797011787492561, guid: 1ff4802adcf96fe4da4c8e69b98efbc9, type: 3}
       propertyPath: m_Layer
@@ -2379,8 +2379,24 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6109850307522666092, guid: 1ff4802adcf96fe4da4c8e69b98efbc9, type: 3}
+      propertyPath: susVis
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6109850307522666092, guid: 1ff4802adcf96fe4da4c8e69b98efbc9, type: 3}
+      propertyPath: chaseVis
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6109850307522666092, guid: 1ff4802adcf96fe4da4c8e69b98efbc9, type: 3}
       propertyPath: fovAngle
       value: 170
+      objectReference: {fileID: 0}
+    - target: {fileID: 6109850307522666092, guid: 1ff4802adcf96fe4da4c8e69b98efbc9, type: 3}
+      propertyPath: movement
+      value: 
+      objectReference: {fileID: 1027149410}
+    - target: {fileID: 6109850307522666092, guid: 1ff4802adcf96fe4da4c8e69b98efbc9, type: 3}
+      propertyPath: patrolVis
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6109850307522666092, guid: 1ff4802adcf96fe4da4c8e69b98efbc9, type: 3}
       propertyPath: susRadius
@@ -2793,19 +2809,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5880729118871779028, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
   m_PrefabInstance: {fileID: 1791536068}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1027149408
+--- !u!114 &1027149410 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 5523800142021471471, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
+  m_PrefabInstance: {fileID: 1791536068}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1027149403}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 546bf94c1a7b6cf4788638f915578447, type: 3}
+  m_Script: {fileID: 11500000, guid: 1d7c1891d4f2efe46bb4e2afbb7f3426, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  respawnCoords: {x: 323, y: 0, z: 2}
 --- !u!1 &1045539929
 GameObject:
   m_ObjectHideFlags: 0
@@ -4385,18 +4399,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 3284730500541101865, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3638538948692463039, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 4218574500945555043, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 4916558863179925933, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
       propertyPath: m_LocalPosition.x
       value: 336.73
@@ -4438,36 +4440,21 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5523800142021471471, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
-      propertyPath: walkNoise
-      value: 20
+      propertyPath: walkVisibility
+      value: 12.5
       objectReference: {fileID: 0}
     - target: {fileID: 5523800142021471471, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
-      propertyPath: crouchNoise
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 5523800142021471471, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
-      propertyPath: sprintNoise
-      value: 30
+      propertyPath: crouchVisibility
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5880729118871779028, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 5880729118871779028, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 7650239640807952085, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5880729118871779028, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1027149408}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3045c91f6831b9844a57bc6c0a048590, type: 3}
 --- !u!1 &1793483902
 GameObject:

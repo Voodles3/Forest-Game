@@ -22,18 +22,18 @@ namespace Forest.AI
         [SerializeField] float deathRange;
 
         [Header("Patrolling")]
-        [Tooltip("View Distance when Patrolling")] [SerializeField] float patrolRadius;
+        [Tooltip("Visiblity Multiplier when Patrolling")] [SerializeField] float patrolVis;
         [SerializeField] float patrolSpeed;
 
         [Header("Suspicious")]
-        [Tooltip("View Distance when Suspicious")] [SerializeField] float susRadius;
+        [Tooltip("Visibility Multiplier when Suspicious")] [SerializeField] float susVis;
         [Tooltip("Time to stare at sound before investigating")] [SerializeField] float suspiciousStartDelay;
         [SerializeField] float suspiciousSpeed;
         [SerializeField] float suspiciousWaitTime;
         [SerializeField] float noiseCheckInterval = 0.5f;
 
         [Header("Chasing")]
-        [Tooltip("View Distance when Chasing and Searching")] [SerializeField] float chaseRadius;
+        [Tooltip("Visibility Multiplier when Chasing and Searching")] [SerializeField] float chaseVis;
         [Tooltip("Time to stare at player before chasing")] [SerializeField] float chaseStartDelay;
         [SerializeField] float chaseSpeed;
         
@@ -47,6 +47,7 @@ namespace Forest.AI
         [Header("References")]
         [SerializeField] TextMeshProUGUI sightText;
         [SerializeField] Transform monsterHead;
+        [SerializeField] PlayerMovement movement;
 
         bool arrived;
         float distanceFromPlayer;
@@ -56,7 +57,6 @@ namespace Forest.AI
         NavMeshAgent agent;
         Waypoint currentWaypoint;
         DeathHandler deathHandler;
-        PlayerMovement playerMovement;
         Collider playerCol;
 
         readonly System.Random random = new();
@@ -73,7 +73,6 @@ namespace Forest.AI
         {
             agent = GetComponent<NavMeshAgent>();
             deathHandler = FindObjectOfType<DeathHandler>();
-            playerMovement = FindObjectOfType<PlayerMovement>();
             playerCol = deathHandler.GetComponentInChildren<Collider>();
 
             CreateWaypointList();
@@ -155,7 +154,7 @@ namespace Forest.AI
         {
             noiseCheckTimer += Time.deltaTime;
 
-            if (noiseCheckTimer >= noiseCheckInterval && distanceFromPlayer <= playerMovement.CurrentNoiseRadius && playerMovement.isMoving)
+            if (noiseCheckTimer >= noiseCheckInterval && distanceFromPlayer <= movement.CurrentNoiseRadius && movement.isMoving)
             {
                 playerInNoiseRadius = true;
                 noiseCheckTimer = 0f;
@@ -181,13 +180,15 @@ namespace Forest.AI
 
         float GetDetectionRadiusForState()
         {
-            return currentState switch
+            float multiplier = currentState switch
             {
-                State.patrolling => patrolRadius,
-                State.suspicious => susRadius,
-                State.chasing or State.searching => chaseRadius,
-                _ => patrolRadius,
+                State.patrolling => patrolVis,
+                State.suspicious => susVis,
+                State.chasing or State.searching => chaseVis,
+                _ => patrolVis,
             };
+            return movement.CurrentVisibility * multiplier;
+
         }
 
         void SightText()
@@ -207,16 +208,19 @@ namespace Forest.AI
         
         void OnDrawGizmosSelected()
         {
-            // Get the dynamic detection radius based on the current state
-            float radius = GetDetectionRadiusForState();
+            float radius = 10f;
 
-            // Set the color and draw the detection radius sphere
+            if (Application.isPlaying)
+            {
+                radius = GetDetectionRadiusForState();
+            }
+
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, radius);
 
-            // Draw the FOV cone
+            // Set up the FOV cone
             Gizmos.color = Color.red;
-            Vector3 forwardDirection = transform.forward * radius; // Extend based on radius
+            Vector3 forwardDirection = transform.forward * radius;
             Quaternion leftRayRotation = Quaternion.AngleAxis(-viewAngle * 0.5f, Vector3.up);
             Quaternion rightRayRotation = Quaternion.AngleAxis(viewAngle * 0.5f, Vector3.up);
 
