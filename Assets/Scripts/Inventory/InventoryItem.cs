@@ -9,13 +9,17 @@ namespace Forest.Inventory
         [SerializeField] bool _active;
         static InventoryItem _currentlyActiveInstance;
 
+        [SerializeField] Sprite itemSprite;
+        public Sprite ItemSprite => itemSprite;
+
+
         HoverEffect hoverEffect;
         public string description;
         public bool canBePickedUp = true;
 
         public bool Active // This property will ensure that only one InventoryItem will ever be active at a time
         {
-            get { return _active; }
+            get => _active;
             set
             {
                 if (value)

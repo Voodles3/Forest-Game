@@ -1,9 +1,13 @@
 using UnityEngine;
 
-public class POILabel : MonoBehaviour
+namespace Forest.UI
 {
-    void LateUpdate()
+    public class POILabel : MonoBehaviour
     {
-        transform.LookAt(transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
+        void LateUpdate()
+        {
+            transform.LookAt(transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
+        }
     }
 }
+

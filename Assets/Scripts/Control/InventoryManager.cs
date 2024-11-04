@@ -11,7 +11,7 @@ namespace Forest.Inventory
         public static InventoryManager Instance { get; private set; }
 
         [Header("Inventory")]
-        [SerializeField] List<InventoryItem> inventory = new();
+        [SerializeField] InventoryItem[] inventory;
         [SerializeField] InventoryItem activeItem;
 
         [Header("Fields")]
@@ -23,7 +23,7 @@ namespace Forest.Inventory
         [SerializeField] Transform facingDirection;
         Transform cameraTransform;
 
-        int activeIndex;
+        [SerializeField] int activeIndex;
 
         PlayerActions actions;
         InputAction scrollAction;
@@ -36,9 +36,14 @@ namespace Forest.Inventory
             Singleton();
             InputSetup();
             activeItem = null; // TODO: make active item + inventory save between play sessions
-            activeIndex = -1;
+            activeIndex = 0;
 
             cameraTransform = Camera.main.transform;
+        }
+
+        void Start()
+        {
+            inventory = new InventoryItem[HotbarManager.Instance.HotbarSlots.Length];
         }
 
         void Singleton()
@@ -64,7 +69,7 @@ namespace Forest.Inventory
         {
             scrollInput = ctx.ReadValue<Vector2>().y;
 
-            CycleActiveItem((scrollInput > 1)? 1 : -1); // 1 if scrollInput is greater than 1, else -1
+            CycleActiveSlot((scrollInput > 1)? 1 : -1); // 1 if scrollInput is greater than 1, else -1
         }
 
         void OnDrop(InputAction.CallbackContext ctx)
@@ -72,30 +77,52 @@ namespace Forest.Inventory
             DropItem(activeIndex);
         }
 
-        void CycleActiveItem(int direction)
+        void CycleActiveSlot(int direction)
         {
             int newIndex = activeIndex + direction;
             if (!CheckIndexExists(newIndex)) return;
 
-            SetItemActive(newIndex);
+            activeItem = inventory[newIndex];
+            if (activeItem != null) { activeItem.Active = true; }
+            activeIndex = newIndex;
+
+            HotbarManager.Instance.HighlightHotbarSlot(newIndex);
         }
 
         public void AddItem(InventoryItem item)
         {
-            if (inventory.Contains(item)) { throw new Exception("This item is already in your inventory!"); }
+            if (inventory.Contains(item)) 
+            {
+                Debug.LogWarning("This item is already in your inventory!");
+                return;
+            }
 
-            inventory.Add(item);
-            if (inventory.Count == 1) { SetItemActive(); }
+            int nextAvailableSlot = Array.IndexOf(inventory, null);
+
+            if (nextAvailableSlot == -1)
+            {
+                Debug.Log("Inventory is full!");
+                return;
+            }
+
+            inventory[nextAvailableSlot] = item;
+
+            HotbarManager.Instance.SetHotbarSlot(nextAvailableSlot, item.ItemSprite);
         }
+
 
         #region Drop Item
 
         void DropItem(int index)
         {
-            if (index == -1f) { Debug.Log("Your inventory is empty!"); return; }
+            if (index < 0 || index >= inventory.Length || inventory[index] == null)
+            {
+                Debug.Log("No item in this slot!");
+                return;
+            }
 
             InventoryItem itemToDrop = inventory[index];
-            inventory.Remove(itemToDrop);
+            inventory[index] = null;
 
             float offset = GetColliderSize(itemToDrop);
             
@@ -106,7 +133,7 @@ namespace Forest.Inventory
             
             ThrowItem(itemToDrop);
 
-            SetItemActive(CheckIndexExists(index) ? index : index - 1); // Set next item in inventory to active
+            HotbarManager.Instance.SetHotbarSlot(index, null);
         }
 
         Vector3 SetSpawnPoint(float offset)
@@ -148,29 +175,9 @@ namespace Forest.Inventory
         
         #endregion
 
-        void SetItemActive(int index=0)
-        {
-            if (!CheckIndexExists(index))
-            {
-                if (inventory.Any())
-                {
-                    activeItem = inventory[0];
-                    activeIndex = 0;
-                    throw new Exception($"There is no item at index {index}!");
-                }
-                activeItem = null; // Inventory is just empty
-                activeIndex = -1;
-                return;
-            }
-
-            activeItem = inventory[index];
-            activeItem.Active = true;
-            activeIndex = index;
-        }
-
         bool CheckIndexExists(int index)
         {
-            if (index >= 0 && index < inventory.Count)
+            if (index >= 0 && index < inventory.Length)
             {
                 return true;
             }
