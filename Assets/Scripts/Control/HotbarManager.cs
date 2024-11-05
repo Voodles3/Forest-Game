@@ -1,6 +1,9 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using Forest.UI;
+using Unity.VisualScripting;
 
 namespace Forest.Inventory
 {
@@ -8,15 +11,14 @@ namespace Forest.Inventory
     {
         public static HotbarManager Instance { get; private set; }
 
-        [SerializeField] Image[] hotbarSlots;
-        public Image[] HotbarSlots => hotbarSlots;
+        [SerializeField] float flashSpeed;
+
+        [SerializeField] HotbarSlot[] hotbarSlots;
+        public HotbarSlot[] HotbarSlots => hotbarSlots;
+
+        bool flashing;
 
         void Awake()
-        {
-            Singleton();
-        }
-
-        void Singleton()
         {
             if (Instance != null && Instance != this)
             {
@@ -28,26 +30,59 @@ namespace Forest.Inventory
             DontDestroyOnLoad(gameObject);
         }
 
-        public void SetHotbarSlot(int slotIndex, Sprite itemSprite)
+        void Start()
+        {
+            HighlightHotbarSlot(0);
+        }
+
+        public void SetSlotSprite(int slotIndex, Sprite itemSprite)
         {   
             if (!CheckIndexExists(slotIndex)) { return; }
 
-            hotbarSlots[slotIndex].sprite = itemSprite;
-            hotbarSlots[slotIndex].enabled = itemSprite != null;
-            hotbarSlots[slotIndex].SetNativeSize();
+            Image slotImage = hotbarSlots[slotIndex].slotImage;
+            slotImage.sprite = itemSprite;
+            slotImage.enabled = itemSprite != null;
+            slotImage.SetNativeSize();
         }
 
         public void HighlightHotbarSlot(int slotIndex)
         {
-            for (int i = 0; i < hotbarSlots.Length; i++)
+            EndFlash();
+            hotbarSlots[slotIndex].Active = true;
+        }
+
+        public void FlashRed(int activeSlot)
+        {
+            StopAllCoroutines();
+            StartCoroutine(Flash(activeSlot));
+        }
+
+        void EndFlash()
+        {
+            StopAllCoroutines();
+            foreach (HotbarSlot slot in hotbarSlots)
             {
-                GameObject overlay = hotbarSlots[i].transform.parent.GetChild(0).gameObject;
-                overlay.SetActive(false);
-                if (i == slotIndex)
-                {
-                    overlay.SetActive(true);
-                }
+                slot.overlayImage.enabled = false;
+                slot.overlayImage.color = Color.white;
             }
+        }
+
+        IEnumerator Flash(int activeSlot)
+        {
+            foreach (HotbarSlot slot in hotbarSlots)
+            {
+                slot.overlayImage.enabled = true;
+                slot.overlayImage.color = Color.red;
+            }
+
+            yield return new WaitForSeconds(flashSpeed);
+            
+            foreach (HotbarSlot slot in hotbarSlots)
+            {
+                slot.overlayImage.enabled = false;
+                slot.overlayImage.color = Color.white;
+            }
+            hotbarSlots[activeSlot].Active = true;
         }
 
         bool CheckIndexExists(int index)

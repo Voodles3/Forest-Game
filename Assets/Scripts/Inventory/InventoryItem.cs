@@ -12,7 +12,6 @@ namespace Forest.Inventory
         [SerializeField] Sprite itemSprite;
         public Sprite ItemSprite => itemSprite;
 
-
         HoverEffect hoverEffect;
         public string description;
         public bool canBePickedUp = true;
@@ -58,6 +57,7 @@ namespace Forest.Inventory
 
         void PickUp()
         {
+            if (!InventoryManager.Instance.AddItem(this)) { return; }
             try
             {
                 Rigidbody rb = GetComponent<Rigidbody>();
@@ -65,7 +65,6 @@ namespace Forest.Inventory
                 rb.angularVelocity = Vector3.zero;
             }
             catch {}
-            InventoryManager.Instance.AddItem(this);
             gameObject.SetActive(false);
             hoverEffect.StopHoverEffect();
         }

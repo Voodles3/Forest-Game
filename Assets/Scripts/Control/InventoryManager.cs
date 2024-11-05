@@ -89,12 +89,12 @@ namespace Forest.Inventory
             HotbarManager.Instance.HighlightHotbarSlot(newIndex);
         }
 
-        public void AddItem(InventoryItem item)
+        public bool AddItem(InventoryItem item)
         {
             if (inventory.Contains(item)) 
             {
                 Debug.LogWarning("This item is already in your inventory!");
-                return;
+                return false;
             }
 
             int nextAvailableSlot = Array.IndexOf(inventory, null);
@@ -102,12 +102,14 @@ namespace Forest.Inventory
             if (nextAvailableSlot == -1)
             {
                 Debug.Log("Inventory is full!");
-                return;
+                HotbarManager.Instance.FlashRed(activeIndex);
+                return false;
             }
 
             inventory[nextAvailableSlot] = item;
 
-            HotbarManager.Instance.SetHotbarSlot(nextAvailableSlot, item.ItemSprite);
+            HotbarManager.Instance.SetSlotSprite(nextAvailableSlot, item.ItemSprite);
+            return true;
         }
 
 
@@ -115,7 +117,7 @@ namespace Forest.Inventory
 
         void DropItem(int index)
         {
-            if (index < 0 || index >= inventory.Length || inventory[index] == null)
+            if (!CheckIndexExists(index) || inventory[index] == null)
             {
                 Debug.Log("No item in this slot!");
                 return;
@@ -133,7 +135,7 @@ namespace Forest.Inventory
             
             ThrowItem(itemToDrop);
 
-            HotbarManager.Instance.SetHotbarSlot(index, null);
+            HotbarManager.Instance.SetSlotSprite(index, null);
         }
 
         Vector3 SetSpawnPoint(float offset)
