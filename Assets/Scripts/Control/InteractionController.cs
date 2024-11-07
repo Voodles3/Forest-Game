@@ -50,7 +50,7 @@ namespace Forest.Interaction
             CastInteractionRay();
             if (interactAction.triggered)
             {
-                Interact();
+                currentInteractable?.Interact();
             }
         }
 
@@ -68,11 +68,6 @@ namespace Forest.Interaction
             }
             currentInteractable = null;
             currentHoveredObject = null;
-        }
-
-        void Interact()
-        {
-            currentInteractable?.Interact();
         }
 
         void OnEnable()

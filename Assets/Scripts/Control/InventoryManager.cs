@@ -107,6 +107,7 @@ namespace Forest.Inventory
             }
 
             inventory[nextAvailableSlot] = item;
+            if (activeIndex == nextAvailableSlot) { activeItem = item; }
 
             HotbarManager.Instance.SetSlotSprite(nextAvailableSlot, item.ItemSprite);
             return true;
@@ -125,6 +126,7 @@ namespace Forest.Inventory
 
             InventoryItem itemToDrop = inventory[index];
             inventory[index] = null;
+            activeItem = null;
 
             float offset = GetColliderSize(itemToDrop);
             
@@ -134,7 +136,7 @@ namespace Forest.Inventory
             itemToDrop.gameObject.SetActive(true);
             
             ThrowItem(itemToDrop);
-
+            
             HotbarManager.Instance.SetSlotSprite(index, null);
         }
 

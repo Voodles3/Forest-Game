@@ -9,7 +9,7 @@ namespace Forest.Interaction
 
         Renderer[] renderers;
         Color originalEmissionColor;
-        bool hovering = true;
+        bool hovering;
 
         void Awake()
         {
@@ -38,12 +38,9 @@ namespace Forest.Interaction
                     StartHoverEffect();
                 }
             }
-            else
+            else if (hovering)
             {
-                if (hovering)
-                {
-                    StopHoverEffect();
-                }
+                StopHoverEffect();
             }
         }
 

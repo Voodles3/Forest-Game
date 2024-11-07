@@ -11,12 +11,10 @@ namespace Forest.Inventory
     {
         public static HotbarManager Instance { get; private set; }
 
-        [SerializeField] float flashSpeed;
+        [SerializeField] float flashDuration;
 
         [SerializeField] HotbarSlot[] hotbarSlots;
         public HotbarSlot[] HotbarSlots => hotbarSlots;
-
-        bool flashing;
 
         void Awake()
         {
@@ -32,7 +30,7 @@ namespace Forest.Inventory
 
         void Start()
         {
-            HighlightHotbarSlot(0);
+            HighlightHotbarSlot(0); // TODO: Save highlighted slot
         }
 
         public void SetSlotSprite(int slotIndex, Sprite itemSprite)
@@ -75,7 +73,7 @@ namespace Forest.Inventory
                 slot.overlayImage.color = Color.red;
             }
 
-            yield return new WaitForSeconds(flashSpeed);
+            yield return new WaitForSeconds(flashDuration);
             
             foreach (HotbarSlot slot in hotbarSlots)
             {

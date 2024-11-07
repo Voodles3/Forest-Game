@@ -10,7 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8364327827672549358}
   - component: {fileID: 7044473270700789350}
+  - component: {fileID: 8033279551400713126}
   - component: {fileID: 388445627310561096}
+  - component: {fileID: 6800747712180680777}
   m_Layer: 0
   m_Name: Controllers
   m_TagString: Untagged
@@ -51,6 +53,26 @@ MonoBehaviour:
   player: {fileID: 0}
   dropOrigin: {fileID: 0}
   facingDirection: {fileID: 0}
+  activeIndex: 0
+--- !u!114 &8033279551400713126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3265883606203118918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a9b1e0778e6f084b92ed6ee53534157, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flashDuration: 0.3
+  hotbarSlots:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &388445627310561096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67,3 +89,20 @@ MonoBehaviour:
   interactable:
     serializedVersion: 2
     m_Bits: 128
+--- !u!114 &6800747712180680777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3265883606203118918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f39b40cecfbe7d47a2da9eba9211e31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DialogueParent: {fileID: 0}
+  DialogTitleText: {fileID: 0}
+  DialogBodyText: {fileID: 0}
+  responseButtonPrefab: {fileID: 0}
+  responseButtonContainer: {fileID: 0}
