@@ -23,3 +23,11 @@ MonoBehaviour:
           nextNode:
             dialogueText: Ok.
             responses: []
+    - responseText: I'm Bing
+      nextNode:
+        dialogueText: Okay.
+        responses:
+        - responseText: Idk CYA
+          nextNode:
+            dialogueText: Ok.
+            responses: []
