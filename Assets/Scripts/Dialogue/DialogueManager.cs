@@ -6,8 +6,8 @@ public class DialogueManager : MonoBehaviour
 {
     public static DialogueManager Instance { get; private set; }
  
-    public GameObject DialogueParent; // Main container for dialogue UI
-    public TextMeshProUGUI DialogTitleText, DialogBodyText; // Text components for title and body
+    public GameObject dialogueParent; // Main container for dialogue UI
+    public TextMeshProUGUI dialogTitleText, dialogDescText; // Text components for title and body
     public GameObject responseButtonPrefab; // Prefab for generating response buttons
     public Transform responseButtonContainer; // Container to hold response buttons
  
@@ -21,18 +21,19 @@ public class DialogueManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
- 
+
         HideDialogue();
     }
- 
-    public void StartDialogue(string title, DialogueNode node)
+
+    public void StartDialogue(string title, string desc, DialogueNode node)
     {
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = true;
         ShowDialogue();
 
-        DialogTitleText.text = title;
-        DialogBodyText.text = node.dialogueText;
+        dialogTitleText.text = title;
+        dialogDescText.text = desc;
+        //DialogBodyText.text = node.dialogueText;
  
         // Remove any existing response buttons
         foreach (Transform child in responseButtonContainer)
@@ -46,17 +47,16 @@ public class DialogueManager : MonoBehaviour
             GameObject buttonObj = Instantiate(responseButtonPrefab, responseButtonContainer);
             buttonObj.GetComponentInChildren<TextMeshProUGUI>().text = response.responseText;
  
-            // Set up button to trigger SelectResponse when clicked
-            buttonObj.GetComponent<Button>().onClick.AddListener(() => SelectResponse(response, title));
+            buttonObj.GetComponent<Button>().onClick.AddListener(() => SelectResponse(title, desc, response));
         }
     }
- 
-    public void SelectResponse(DialogueResponse response, string title)
+
+    public void SelectResponse(string title, string desc, DialogueResponse response)
     {
         // Check if there's a follow-up node
         if (!response.nextNode.IsLastNode())
         {
-            StartDialogue(title, response.nextNode); // Start next dialogue
+            StartDialogue(title, desc, response.nextNode); // Start next dialogue
         }
         else
         {
@@ -67,18 +67,18 @@ public class DialogueManager : MonoBehaviour
  
     void HideDialogue()
     {
-        DialogueParent.SetActive(false);
+        dialogueParent.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
  
     void ShowDialogue()
     {
-        DialogueParent.SetActive(true);
+        dialogueParent.SetActive(true);
     }
  
     public bool IsDialogueActive()
     {
-        return DialogueParent.activeSelf;
+        return dialogueParent.activeSelf;
     }
 }
