@@ -13,21 +13,31 @@ MonoBehaviour:
   m_Name: Betty
   m_EditorClassIdentifier: 
   RootNode:
-    dialogueText: What do you want?
+    dialogueText: eeee
+    responseDelay: 0
+    displayTime: 0
     responses:
-    - responseText: I'm Boing
+    - responseText: I want to buy something.
       nextNode:
-        dialogueText: So what?
+        dialogueText: Great! What do you want?
+        responseDelay: 2
+        displayTime: 2
         responses:
-        - responseText: Idk CYA
+        - responseText: Don't know. bye!
           nextNode:
-            dialogueText: Ok.
+            dialogueText: Ok bye!
+            responseDelay: 0
+            displayTime: 2
             responses: []
-    - responseText: I'm Bing
+    - responseText: Tell me about yourself!
       nextNode:
-        dialogueText: Okay.
+        dialogueText: I'm a Jeweler!
+        responseDelay: 2
+        displayTime: 2
         responses:
-        - responseText: Idk CYA
+        - responseText: Cool! Bye!
           nextNode:
-            dialogueText: Ok.
+            dialogueText: Bye!
+            responseDelay: 0
+            displayTime: 2
             responses: []

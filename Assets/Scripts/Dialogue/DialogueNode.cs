@@ -4,9 +4,11 @@ using System.Collections.Generic;
 public class DialogueNode
 {
     public string dialogueText;
+    public float responseDelay;
+    public float displayTime;
     public List<DialogueResponse> responses;
  
-    internal bool IsLastNode()
+    internal bool HasNoResponses()
     {
         return responses.Count <= 0;
     }

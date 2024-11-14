@@ -62,7 +62,7 @@ namespace Forest.Inventory
         {
             actions = new();
             scrollAction = actions.Gameplay.CycleInventory;
-            dropAction = actions.Gameplay.DropHeldItem;
+            dropAction = actions.Gameplay.DropItem;
         }
 
         void OnScroll(InputAction.CallbackContext ctx)

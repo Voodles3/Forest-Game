@@ -60,9 +60,18 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Drop Held Item",
+                    "name": "Drop Item",
                     "type": "Button",
                     "id": "5ecff09b-b6c4-4f88-bc3a-c5d54b67bb4d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Exit Menu",
+                    "type": "Button",
+                    "id": "d0d35dc6-9381-4dae-b915-22d2c0be26bd",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -187,7 +196,29 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
-                    "action": "Drop Held Item",
+                    "action": "Drop Item",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "41db5bfa-b5ab-4dc4-aec4-a9b184fc17ed",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Exit Menu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "192cb7e7-3a0b-4438-a874-6bc01e04d9f6",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Exit Menu",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
