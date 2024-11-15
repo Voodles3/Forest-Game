@@ -41,6 +41,7 @@ namespace Forest.Movement
 
         void Update()
         {
+            if (DialogueManager.Instance.GetDialogueActive()) { return; }
             Look();
             ViewBobbing();
         }

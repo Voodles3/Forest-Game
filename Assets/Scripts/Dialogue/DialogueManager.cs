@@ -7,7 +7,10 @@ using UnityEngine.InputSystem;
 public class DialogueManager : MonoBehaviour
 {
     public static DialogueManager Instance { get; private set; }
- 
+
+    [SerializeField] Color disabledResponseColor;
+
+    [Header("References")]
     public GameObject dialogBoxParent;
     public GameObject dialogueTextParent;
     public TextMeshProUGUI dialogTitleText, dialogDescText, dialogueText;
@@ -49,7 +52,7 @@ public class DialogueManager : MonoBehaviour
         // Display a random initial dialogue line
         if (currentDialogueTextCoroutine != null) { StopCoroutine(currentDialogueTextCoroutine); }
         currentDialogueTextCoroutine = 
-        StartCoroutine(DisplayDialogueText(npc.initialDialogueDisplayTime, 0f, npc.initialDialogues[Random.Range(0, npc.initialDialogues.Length - 1)]));
+        StartCoroutine(DisplayDialogueText(npc.initialDialogueDisplayTime, 0f, npc.initialResponses[Random.Range(0, npc.initialResponses.Length)]));
  
         // Remove any existing response buttons
         foreach (Transform child in responseButtonContainer)
@@ -67,7 +70,7 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
-    public void StartDialogue(DialogueNode node) // This overload will be called after the Dialog menu is already open and a button has been pressed
+    public void ContinueDialogue(DialogueNode node)
     {
         foreach (Transform child in responseButtonContainer)
         {
@@ -85,18 +88,19 @@ public class DialogueManager : MonoBehaviour
 
     public void OnResponseClicked(DialogueNode dialogueNode)
     {
-        // Check if there's a follow-up node
-        if (!dialogueNode.HasNoResponses())
+        foreach (Transform child in responseButtonContainer)
         {
-            if (currentDialogueTextCoroutine != null) { StopCoroutine(currentDialogueTextCoroutine); }
-            currentDialogueTextCoroutine = 
-            StartCoroutine(DisplayDialogueText(dialogueNode.displayTime, dialogueNode.responseDelay, dialogueNode.dialogueText, dialogueNode));
+            Button button = child.GetComponent<Button>();
+            button.interactable = false;
+            button.GetComponentInChildren<TextMeshProUGUI>().color = disabledResponseColor;
         }
-        else
+
+        if (currentDialogueTextCoroutine != null) { StopCoroutine(currentDialogueTextCoroutine); }
+        currentDialogueTextCoroutine = 
+        StartCoroutine(DisplayDialogueText(dialogueNode.displayTime, dialogueNode.responseDelay, dialogueNode.dialogueText, dialogueNode));
+
+        if (dialogueNode.HasNoResponses())
         {
-            if (currentDialogueTextCoroutine != null) { StopCoroutine(currentDialogueTextCoroutine); }
-            currentDialogueTextCoroutine = 
-            StartCoroutine(DisplayDialogueText(dialogueNode.displayTime, dialogueNode.responseDelay, dialogueNode.dialogueText, dialogueNode));
             ExitDialogue();
         }
     }
@@ -112,7 +116,7 @@ public class DialogueManager : MonoBehaviour
             yield return null;
         }
 
-        if (IsDialogueActive() && dialogueNode != null) { StartDialogue(dialogueNode); }
+        if (GetDialogueActive() && dialogueNode != null) { ContinueDialogue(dialogueNode); }
 
         endTime = Time.time + (displayTime - responseDelay);
         while (Time.time <= endTime)
@@ -133,7 +137,7 @@ public class DialogueManager : MonoBehaviour
 
     void OnExitDialogue(InputAction.CallbackContext ctx) => ExitDialogue();
 
-    void ExitDialogue()
+    public void ExitDialogue()
     {
         dialogBoxParent.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
@@ -145,7 +149,7 @@ public class DialogueManager : MonoBehaviour
         dialogBoxParent.SetActive(true);
     }
  
-    public bool IsDialogueActive()
+    public bool GetDialogueActive()
     {
         return dialogBoxParent.activeSelf;
     }

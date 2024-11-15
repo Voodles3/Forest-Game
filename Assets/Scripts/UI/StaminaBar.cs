@@ -9,10 +9,10 @@ namespace Forest.UI
         [SerializeField] Slider slider;
 
         public float maxStamina = 100f;
-        public float currentStamina;
+        [HideInInspector] public float currentStamina;
         public float regenRate = 10f;
         public float regenDelay = 1f;
-        public float drainRate;
+        [HideInInspector] public float drainRate;
 
         bool isDraining;
         bool isRegenerating;

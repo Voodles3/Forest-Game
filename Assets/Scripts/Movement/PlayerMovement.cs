@@ -196,6 +196,12 @@ namespace Forest.Movement
 
         void ReceiveInput()
         {
+            if (DialogueManager.Instance.GetDialogueActive()) 
+            { 
+                inputs = Vector2.zero;
+                Crouch(false);
+                return;
+            }
             inputs = inputActions.Gameplay.Movement.ReadValue<Vector2>(); // Move
             if (jumpAction.ReadValue<float>() > 0f) { OnJump(); } // Jump
             Crouch(crouchAction.ReadValue<float>() > 0f); // Crouch
