@@ -3067,7 +3067,7 @@ Transform:
   m_GameObject: {fileID: 979685056}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 172.9, y: 0, z: -200}
+  m_LocalPosition: {x: 172.9, y: 0, z: -258.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3279,6 +3279,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 937977782748185181, guid: 85008591ad1ebdc47b8c5d196e36dd3b, type: 3}
+      propertyPath: field of view
+      value: 70.00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 937977782748185181, guid: 85008591ad1ebdc47b8c5d196e36dd3b, type: 3}
+      propertyPath: m_FocalLength
+      value: 17.137774
+      objectReference: {fileID: 0}
+    - target: {fileID: 937977782748185181, guid: 85008591ad1ebdc47b8c5d196e36dd3b, type: 3}
+      propertyPath: m_projectionMatrixMode
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1960486240569562010, guid: 85008591ad1ebdc47b8c5d196e36dd3b, type: 3}
       propertyPath: m_Name
       value: Camera Holder
@@ -3331,6 +3343,10 @@ PrefabInstance:
       propertyPath: facingDirection
       value: 
       objectReference: {fileID: 992263444}
+    - target: {fileID: 8295824677112578120, guid: 85008591ad1ebdc47b8c5d196e36dd3b, type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6662,6 +6678,22 @@ PrefabInstance:
     - target: {fileID: 7404047441808898675, guid: e6708efe53bb1984bba338387d9723d2, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8186001023462556725, guid: e6708efe53bb1984bba338387d9723d2, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.92
+      objectReference: {fileID: 0}
+    - target: {fileID: 8186001023462556725, guid: e6708efe53bb1984bba338387d9723d2, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.92
+      objectReference: {fileID: 0}
+    - target: {fileID: 8186001023462556725, guid: e6708efe53bb1984bba338387d9723d2, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.92
+      objectReference: {fileID: 0}
+    - target: {fileID: 8186001023462556725, guid: e6708efe53bb1984bba338387d9723d2, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
